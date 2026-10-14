@@ -1,0 +1,179 @@
+{
+  "header": {
+    "label": "ACCENTURE & AVANADE COMMUNITY",
+    "year": "2026",
+    "titleLine1": "Claude Code",
+    "titleLine2": "on Earth",
+    "tagline": "Built around one valuable skill: Claude Code. Asia, Europe and Oceania today, **everywhere on Earth in the future.**",
+    "introTitle": "A casual cross-border community"
+  },
+  "stats": {
+    "membersOverride": null,
+    "countriesOverride": null
+  },
+  "countries": [
+    {
+      "name": "Norway",
+      "count": 1
+    },
+    {
+      "name": "Germany",
+      "count": 1
+    },
+    {
+      "name": "Greece",
+      "count": 1
+    },
+    {
+      "name": "Romania",
+      "count": 1
+    },
+    {
+      "name": "Spain",
+      "count": 1
+    },
+    {
+      "name": "Portugal",
+      "count": 1
+    },
+    {
+      "name": "France",
+      "count": 1
+    },
+    {
+      "name": "Japan",
+      "count": 2
+    },
+    {
+      "name": "India",
+      "count": 4
+    },
+    {
+      "name": "Philippines",
+      "count": 1
+    },
+    {
+      "name": "Poland",
+      "count": 3
+    },
+    {
+      "name": "Netherlands",
+      "count": 1
+    },
+    {
+      "name": "Australia",
+      "count": 3
+    },
+    {
+      "name": "Singapore",
+      "count": 1
+    }
+  ],
+  "quotes": [
+    {
+      "text": "Connecting with likeminded people and share thoughts around AI and increasing productivity",
+      "name": "Vangelis",
+      "country": "Greece"
+    }
+  ],
+  "activitiesTitle": "What You Can Do",
+  "activities": [
+    {
+      "id": "learn-build",
+      "icon": "terminal",
+      "title": "Learn & Build Sessions",
+      "sub": "45 MIN · EVERY OTHER SUNDAY",
+      "body": "First half: presentation & discussion.\nSecond half: hands-on build related to the first half.\nNo need to attend every time.",
+      "meetup": true,
+      "timesFrom": "learn-build"
+    },
+    {
+      "id": "build-hour",
+      "icon": "bolt",
+      "title": "Build Hour",
+      "sub": "40 MIN · WEEKDAYS · IRREGULAR",
+      "body": "Build on any theme you like — yours or a suggested one. Ask questions, trade ideas, then demo the outputs to each other.",
+      "meetup": true
+    },
+    {
+      "id": "tips-exchange",
+      "icon": "swap",
+      "title": "“Tips Exchange” Pair",
+      "sub": "SWAP ONE WORK TIP",
+      "steps": [
+        "Get paired with one member, usually from another region.",
+        "Each share one tip — a few lines or a screenshot is fine.",
+        "Try your partner’s tip, then reply."
+      ]
+    },
+    {
+      "id": "chat",
+      "icon": "chat",
+      "title": "Questions answered in chat",
+      "sub": "ALWAYS SOMEONE TO ASK",
+      "body": "Ask in the *#03_Ask for help* channel, whenever you have questions or problem."
+    },
+    {
+      "id": "interaction",
+      "title": "Casual Interaction Events",
+      "body": "Welcome events for new members, and casual events in between.",
+      "icon": "users"
+    },
+    {
+      "id": "cross-border",
+      "status": "coming-soon",
+      "statusLabel": "NOT STARTED YET · COMING NEXT",
+      "title": "Cross-Border Project Work using Claude Code",
+      "icon": "globe"
+    }
+  ],
+  "nextUpTitle": "Next Up",
+  "timeZones": [
+    {
+      "tz": "Asia/Tokyo",
+      "label": "JST"
+    },
+    {
+      "tz": "Europe/Berlin",
+      "label": "auto"
+    },
+    {
+      "tz": "Asia/Kolkata",
+      "label": "IST"
+    }
+  ],
+  "schedule": [
+    {
+      "id": "learn-build",
+      "label": "LEARN & BUILD",
+      "date": "2026-10-11",
+      "startJST": "20:00",
+      "durationMin": 45,
+      "repeatEveryDays": 14
+    },
+    {
+      "id": "build-hour",
+      "label": "BUILD HOUR",
+      "date": "2026-10-16",
+      "startJST": "22:00",
+      "durationMin": 40,
+      "repeatEveryDays": null
+    }
+  ],
+  "join": {
+    "title": "Join Us",
+    "subtitle": "Come as you are. It’s casual.",
+    "needTitle": "All you need",
+    "requirements": [
+      "Some hands-on Claude Code experience",
+      "Conversational English"
+    ],
+    "contact": {
+      "label": "Want to join? Contact",
+      "name": "shintaro.a.yasuda",
+      "location": "Tokyo",
+      "photo": "assets/img/contact.jpg",
+      "link": ""
+    }
+  }
+}

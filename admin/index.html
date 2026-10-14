@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Admin · Claude Code on Earth</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@1,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/admin.css">
+</head>
+<body>
+
+<!-- Login -->
+<div class="login" id="login" hidden>
+  <form id="login-form">
+    <div class="logo">CLAUDE CODE <em>on Earth</em></div>
+    <h1>Admin</h1>
+    <label>Password<input type="password" id="password" autocomplete="current-password" required autofocus></label>
+    <button class="primary" type="submit">Log in</button>
+    <p class="err" id="login-err"></p>
+  </form>
+</div>
+
+<!-- Dashboard -->
+<div class="app" id="app" hidden>
+  <header class="bar">
+    <div class="logo">CLAUDE CODE <em>on Earth</em> <span>Admin</span></div>
+    <div class="status" id="status"></div>
+    <div class="actions">
+      <button id="btn-history" title="See and load older saved versions">History</button>
+      <button id="btn-default" title="Load the original content into the editor">Start from default</button>
+      <button id="btn-backup" title="Download the content as a JSON file">Download backup</button>
+      <a class="btn" href="/" target="_blank" rel="noopener">View site ↗</a>
+      <button id="btn-logout">Log out</button>
+      <button class="primary" id="btn-save">Save &amp; publish</button>
+    </div>
+  </header>
+
+  <main class="split">
+    <div class="editor" id="editor"></div>
+    <div class="preview">
+      <div class="preview-bar">
+        <span>Live preview</span>
+        <div class="seg" id="device">
+          <button data-w="1280" class="on">Desktop</button>
+          <button data-w="390">Mobile</button>
+        </div>
+      </div>
+      <div class="frame" id="frame"><iframe id="pv" title="Live preview"></iframe></div>
+    </div>
+  </main>
+</div>
+
+<!-- History dialog -->
+<dialog id="history">
+  <h2>Older versions</h2>
+  <p class="hint">A copy is kept each time you save (last 10). Loading one puts it in the editor. Nothing changes on the site until you press <b>Save &amp; publish</b>.</p>
+  <ul id="history-list"></ul>
+  <form method="dialog"><button>Close</button></form>
+</dialog>
+
+<div class="toast" id="toast"></div>
+
+<script src="/assets/countries.js"></script>
+<script src="/assets/render.js"></script>
+<script src="/assets/admin.js"></script>
+</body>
+</html>
