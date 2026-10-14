@@ -114,13 +114,14 @@ function renderSchedule(c, now = new Date()) {
   }).join('');
 }
 
-// The soonest upcoming event, for the hero stats row
-function soonest(c, now = new Date()) {
+// Every upcoming session, soonest first, for the hero stats row
+function upcoming(c, now = new Date()) {
   return c.schedule
     .map(item => ({ item, start: nextStart(item, now) }))
     .filter(x => x.start)
-    .sort((a, b) => a.start - b.start)[0];
+    .sort((a, b) => a.start - b.start);
 }
+const titleCase = s => s.toLowerCase().replace(/(^|\s)\S/g, m => m.toUpperCase());
 
 function renderPage(c, root = document) {
   const $ = id => root.getElementById ? root.getElementById(id) : root.querySelector('#' + id);
@@ -132,9 +133,12 @@ function renderPage(c, root = document) {
   $('title').innerHTML = `${esc(h.titleLine1)}<em>${esc(h.titleLine2)}</em>`;
   $('members').textContent = t.members;
   $('countries').textContent = t.countries;
-  const next = soonest(c);
-  $('next-date').textContent = next ? dayLabel(next.start).replace(/ (\w{3})\w*$/, ' $1') : 'TBD';
-  $('next-label').textContent = next ? `Next: ${next.item.label.toLowerCase().replace(/(^|\s)\S/g, m => m.toUpperCase())}` : 'Next session';
+  const stats = $('stats');
+  stats.querySelectorAll('.is-next').forEach(el => el.remove());
+  const next = upcoming(c);
+  stats.insertAdjacentHTML('beforeend', next.length
+    ? next.map(x => `<div class="stat is-next"><b>${dayLabel(x.start).replace(/ (\w{3})\w*$/, ' $1')}</b><span>Next: ${esc(titleCase(x.item.label))}</span></div>`).join('')
+    : '<div class="stat is-next"><b>TBD</b><span>Next session</span></div>');
 
   renderMap(c);
   $('intro-title').textContent = h.introTitle;
@@ -178,5 +182,5 @@ function renderPage(c, root = document) {
     `<div><div class="eyebrow">${esc(p.label || 'Contact')}</div><div class="name">${esc(p.name)}</div>` +
     (p.location ? `<div class="loc"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${esc(p.location)}</div>` : '') +
     (p.link ? `<a class="btn" href="${esc(p.link)}" target="_blank" rel="noopener">Get in touch</a>` : '') + '</div>';
-  $('foot').textContent = `${h.titleLine1} ${h.titleLine2} © ${h.year} · ${h.label.toLowerCase().replace(/(^|\s)\S/g, m => m.toUpperCase())}`;
+  $('foot').textContent = `${h.titleLine1} ${h.titleLine2} © ${h.year} · ${titleCase(h.label)}`;
 }

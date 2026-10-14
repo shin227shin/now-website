@@ -4,7 +4,7 @@
     "year": "2026",
     "titleLine1": "Claude Code",
     "titleLine2": "on Earth",
-    "tagline": "Built around one valuable skill: Claude Code. Asia, Europe and Oceania today, **everywhere on Earth in the future.**",
+    "tagline": "Built around one valuable skill: Claude Code.\nAsia, Europe and Oceania today, **everywhere on Earth in the future.**",
     "introTitle": "A casual cross-border community"
   },
   "stats": {
@@ -145,7 +145,7 @@
   "schedule": [
     {
       "id": "learn-build",
-      "label": "LEARN & BUILD",
+      "label": "LEARN & BUILD SESSIONS",
       "date": "2026-10-11",
       "startJST": "20:00",
       "durationMin": 45,
