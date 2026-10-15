@@ -302,6 +302,7 @@ function joinSection() {
   const src = /^(data:|https?:|\/)/.test(photo) ? photo : '/' + photo;
   return section('join', 'join', 'Join Us', `
     <div class="row">${text('Heading', 'join.title')}${text('Text under the heading', 'join.subtitle')}</div>
+    ${text('Recruiting notice (optional)', 'join.recruiting', { hint: 'Shown as a small badge under the heading. Leave empty to hide it.' })}
     ${text('“All you need” title', 'join.needTitle')}
     ${lines('Requirements', 'join.requirements')}
     <div class="sub-h">Contact person</div>

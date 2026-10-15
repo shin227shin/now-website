@@ -77,11 +77,52 @@ function renderMap(c) {
     const p = countryPin(x.name, x.pin);
     if (!p) return '';
     const [cx, cy] = p;
-    const badge = x.count > 1
-      ? `<circle cx="${cx + 14}" cy="${cy - 14}" r="12" fill="#fff"/><text x="${cx + 14}" y="${cy - 9}" text-anchor="middle" font-family="Inter" font-weight="800" font-size="15" fill="#1a1a2e">${Number(x.count)}</text>`
+    const n = Number(x.count) || 0;
+    const badge = n > 1
+      ? `<circle cx="${cx + 14}" cy="${cy - 14}" r="12" fill="#fff"/><text x="${cx + 14}" y="${cy - 9}" text-anchor="middle" font-family="Inter" font-weight="800" font-size="15" fill="#1a1a2e">${n}</text>`
       : '';
-    return `<g><title>${esc(x.name)}${x.count > 1 ? ' ×' + Number(x.count) : ''}</title><circle class="pin" cx="${cx}" cy="${cy}" r="11" fill="#D97757" opacity=".28"/><circle cx="${cx}" cy="${cy}" r="5" fill="#FF9A76" stroke="#fff" stroke-width="1.5"/>${badge}</g>`;
+    return `<g class="pin-g" tabindex="0" role="button" aria-label="${esc(x.name)}" data-name="${esc(x.name)}" data-count="${n}"><circle cx="${cx}" cy="${cy}" r="22" fill="transparent"/><circle class="pin" cx="${cx}" cy="${cy}" r="11" fill="#D97757" opacity=".28"/><circle class="dot" cx="${cx}" cy="${cy}" r="5" fill="#FF9A76" stroke="#fff" stroke-width="1.5"/>${badge}</g>`;
   }).join('');
+  mapTips(g);
+}
+
+// Tap (or hover) a pin to show the country name in a small label above it.
+function mapTips(g) {
+  const map = g.closest('.map');
+  if (!map || map._tips) return;
+  map._tips = true;
+  const tip = document.createElement('div');
+  tip.className = 'map-tip';
+  map.appendChild(tip);
+  let cur = null;
+  const show = pin => {
+    if (cur) cur.classList.remove('on');
+    cur = pin;
+    pin.classList.add('on');
+    const n = Number(pin.dataset.count);
+    tip.innerHTML = `<b>${esc(pin.dataset.name)}</b>${n ? `<span>${n} member${n > 1 ? 's' : ''}</span>` : ''}`;
+    const d = pin.querySelector('.dot').getBoundingClientRect(), m = map.getBoundingClientRect();
+    // Keep the label inside the map; the little arrow still points at the pin
+    const x = d.left + d.width / 2 - m.left, half = tip.offsetWidth / 2;
+    const left = Math.min(Math.max(x, half + 8), m.width - half - 8);
+    tip.style.left = `${left}px`;
+    tip.style.setProperty('--arrow', `${x - left}px`);
+    // Sit above the count badge too, when there is one
+    const badge = pin.querySelector('circle[fill="#fff"]');
+    tip.style.top = `${Math.min(d.top, badge ? badge.getBoundingClientRect().top : d.top) - m.top}px`;
+    tip.classList.add('show');
+  };
+  const hide = () => { if (cur) cur.classList.remove('on'); cur = null; tip.classList.remove('show'); };
+  const pinOf = e => e.target.closest?.('.pin-g');
+  map.addEventListener('click', e => { const p = pinOf(e); p && p !== cur ? show(p) : hide(); });
+  map.addEventListener('pointerover', e => { const p = pinOf(e); if (p && e.pointerType === 'mouse') show(p); });
+  map.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') hide(); });
+  map.addEventListener('keydown', e => {
+    const p = pinOf(e);
+    if (p && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); show(p); }
+    if (e.key === 'Escape') hide();
+  });
+  addEventListener('resize', hide);
 }
 
 function renderCard(a, c) {
@@ -174,6 +215,10 @@ function renderPage(c, root = document) {
   const j = c.join;
   $('join-title').textContent = j.title;
   $('join-sub').textContent = j.subtitle;
+  // Content saved before this field existed has no "recruiting", so fall back to the current notice
+  const rec = j.recruiting ?? 'Now recruiting members from **North & South America** only';
+  $('join-rec').innerHTML = rec ? `<span class="live"></span><span>${md(rec)}</span>` : '';
+  $('join-rec').style.display = rec ? '' : 'none';
   $('need-title').textContent = j.needTitle;
   $('need-list').innerHTML = j.requirements.map(r => `<li>${md(r)}</li>`).join('');
   const p = j.contact || {};
