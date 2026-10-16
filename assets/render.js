@@ -155,12 +155,11 @@ function renderSchedule(c, now = new Date()) {
   }).join('');
 }
 
-// Every upcoming session, soonest first, for the hero stats row
+// Every session for the hero stats row: upcoming ones soonest first, then the ones with no date yet
 function upcoming(c, now = new Date()) {
   return c.schedule
     .map(item => ({ item, start: nextStart(item, now) }))
-    .filter(x => x.start)
-    .sort((a, b) => a.start - b.start);
+    .sort((a, b) => (!a.start - !b.start) || (a.start && b.start ? a.start - b.start : 0));
 }
 const titleCase = s => s.toLowerCase().replace(/(^|\s)\S/g, m => m.toUpperCase());
 
@@ -178,7 +177,7 @@ function renderPage(c, root = document) {
   stats.querySelectorAll('.is-next').forEach(el => el.remove());
   const next = upcoming(c);
   stats.insertAdjacentHTML('beforeend', next.length
-    ? next.map(x => `<div class="stat is-next"><b>${dayLabel(x.start).replace(/ (\w{3})\w*$/, ' $1')}</b><span>Next: ${esc(titleCase(x.item.label))}</span></div>`).join('')
+    ? next.map(x => `<div class="stat is-next${x.start ? '' : ' tbd'}"><b>${x.start ? dayLabel(x.start).replace(/ (\w{3})\w*$/, ' $1') : 'Date TBD'}</b><span>Next: ${esc(titleCase(x.item.label))}</span></div>`).join('')
     : '<div class="stat is-next"><b>TBD</b><span>Next session</span></div>');
 
   renderMap(c);
@@ -228,4 +227,16 @@ function renderPage(c, root = document) {
     (p.location ? `<div class="loc"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${esc(p.location)}</div>` : '') +
     (p.link ? `<a class="btn" href="${esc(p.link)}" target="_blank" rel="noopener">Get in touch</a>` : '') + '</div>';
   $('foot').textContent = `${h.titleLine1} ${h.titleLine2} © ${h.year} · ${titleCase(h.label)}`;
+
+  // When the soonest session ends, draw the page again so every date moves on without a reload.
+  // Also redraw when the tab comes back, since timers can be late in hidden tabs or after sleep.
+  clearTimeout(renderPage._rollTimer);
+  const ends = c.schedule
+    .map(item => { const s = nextStart(item); return s && s.getTime() + (Number(item.durationMin) || 0) * 60000; })
+    .filter(Boolean);
+  const wait = ends.length ? Math.min(...ends) - Date.now() + 1000 : null;
+  if (wait !== null && wait < 2147483647) renderPage._rollTimer = setTimeout(() => renderPage(c, root), Math.max(wait, 1000));
+  if (renderPage._onShow) document.removeEventListener('visibilitychange', renderPage._onShow);
+  renderPage._onShow = () => { if (document.visibilityState === 'visible') renderPage(c, root); };
+  document.addEventListener('visibilitychange', renderPage._onShow);
 }
