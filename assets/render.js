@@ -73,6 +73,8 @@ function timeRows(c, start, durationMin) {
 function renderMap(c) {
   const g = document.getElementById('pins');
   if (!g) return;
+  // --i = place from west to east, so the opening intro can light the pins up in a sweep
+  const xs = c.countries.map(x => countryPin(x.name, x.pin)?.[0]).filter(v => v != null).sort((a, b) => a - b);
   g.innerHTML = c.countries.map(x => {
     const p = countryPin(x.name, x.pin);
     if (!p) return '';
@@ -81,7 +83,7 @@ function renderMap(c) {
     const badge = n > 1
       ? `<circle cx="${cx + 14}" cy="${cy - 14}" r="12" fill="#fff"/><text x="${cx + 14}" y="${cy - 9}" text-anchor="middle" font-family="Inter" font-weight="800" font-size="15" fill="#1a1a2e">${n}</text>`
       : '';
-    return `<g class="pin-g" tabindex="0" role="button" aria-label="${esc(x.name)}" data-name="${esc(x.name)}" data-count="${n}"><circle cx="${cx}" cy="${cy}" r="22" fill="transparent"/><circle class="pin" cx="${cx}" cy="${cy}" r="11" fill="#D97757" opacity=".28"/><circle class="dot" cx="${cx}" cy="${cy}" r="5" fill="#FF9A76" stroke="#fff" stroke-width="1.5"/>${badge}</g>`;
+    return `<g class="pin-g" style="--i:${xs.indexOf(cx)}" tabindex="0" role="button" aria-label="${esc(x.name)}" data-name="${esc(x.name)}" data-count="${n}"><circle cx="${cx}" cy="${cy}" r="22" fill="transparent"/><circle class="pin" cx="${cx}" cy="${cy}" r="11" fill="#D97757" opacity=".28"/><circle class="dot" cx="${cx}" cy="${cy}" r="5" fill="#FF9A76" stroke="#fff" stroke-width="1.5"/>${badge}</g>`;
   }).join('');
   mapTips(g);
 }

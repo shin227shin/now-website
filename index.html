@@ -22,8 +22,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,500;1,500;1,600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
+<script>
+// Opening intro (assets/intro.js): on every visit, but not in the admin preview, not when the link points to a section,
+// and not for people whose device is set to reduce motion
+if (!new URLSearchParams(location.search).has('preview') && !location.hash && !matchMedia('(prefers-reduced-motion: reduce)').matches)
+  document.documentElement.classList.add('intro');
+</script>
 </head>
 <body>
+<div class="intro-ov" id="intro" aria-hidden="true"><canvas></canvas><span class="skip">Tap to skip</span></div>
+<script src="assets/intro.js"></script>
 <nav class="nav" id="nav">
   <a class="logo" href="#top">CLAUDE CODE <em>on Earth</em></a>
   <ul><li><a href="#community">Community</a></li><li><a href="#activities">Activities</a></li><li><a href="#next">Next Up</a></li><li><a href="#join">Join</a></li></ul>

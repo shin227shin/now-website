@@ -71,6 +71,21 @@ body{counter-reset:sec}
 .stat.is-next b{color:var(--coral)}
 .stat.tbd{opacity:.6}
 
+/* ---------- Opening intro: somewhere in space → close in on Earth → flash → world map with pins lighting up ---------- */
+.intro-ov{display:none}
+html.intro .intro-ov{display:block;position:fixed;inset:0;z-index:20;background:#05060d;cursor:pointer;transition:opacity .9s ease}
+.intro-ov canvas{display:block;width:100%;height:100%}
+.intro-ov .skip{position:absolute;right:28px;bottom:24px;font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:rgba(255,255,255,.4)}
+html.intro.landed .intro-ov{opacity:0;pointer-events:none}
+html.intro:not(.landed){overflow:hidden}
+html.intro .hero>*,html.intro .nav{opacity:0}
+html.intro .map{transform:scale(1.08)}
+html.intro .pin-g{opacity:0}
+html.intro.landed .hero>*,html.intro.landed .nav{opacity:1;transition:opacity 1s ease .5s}
+html.intro.landed .hero .map{transform:none;transition:opacity 1.2s ease,transform 1.8s cubic-bezier(.2,.7,.2,1)}
+html.intro.landed .pin-g{animation:pin-on .7s cubic-bezier(.2,.9,.3,1.4) both;animation-delay:calc(.6s + var(--i,0) * .14s);transform-box:fill-box;transform-origin:center}
+@keyframes pin-on{from{opacity:0;transform:scale(.2)}60%{opacity:1}to{opacity:1;transform:none}}
+
 /* ---------- Community ---------- */
 /* Countries as a clean spec list with hairlines */
 .chips{display:grid;grid-template-columns:repeat(4,1fr);column-gap:40px;margin-top:8px}
