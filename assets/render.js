@@ -170,9 +170,8 @@ function renderPage(c, root = document) {
   const t = totals(c);
   const h = c.header;
 
-  $('label').textContent = h.label;
   $('year').textContent = h.year;
-  $('title').innerHTML = `${esc(h.titleLine1)}<em>${esc(h.titleLine2)}</em>`;
+  $('title').textContent = `${h.titleLine1} ${h.titleLine2}`; // hidden heading for screen readers and search engines
   $('members').textContent = t.members;
   $('countries').textContent = t.countries;
   const stats = $('stats');
