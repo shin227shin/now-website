@@ -184,12 +184,12 @@ function renderPage(c, root = document) {
   $('intro-title').textContent = h.introTitle;
   $('tagline').innerHTML = md(h.tagline);
   $('chips').innerHTML = c.countries.map(x =>
-    `<span class="chip">${esc(x.name)}${x.count > 1 ? `<s>×${Number(x.count)}</s>` : ''}</span>`).join('');
+    `<span class="chip${x.count > 1 ? ' many' : ''}"><span>${esc(x.name)}</span><s>${String(Number(x.count) || 0).padStart(2, '0')}</s></span>`).join('');
 
   const quotes = (c.quotes || []).filter(q => q.text);
   const showQuote = i => {
     const q = quotes[i % quotes.length];
-    $('quote').innerHTML = `<div><q>“${esc(q.text)}”</q><small>— ${esc([q.name, q.country].filter(Boolean).join(', ').toUpperCase())}</small></div>`;
+    $('quote').innerHTML = `<div><q>${esc(q.text)}</q><small>— ${esc([q.name, q.country].filter(Boolean).join(', ').toUpperCase())}</small></div>`;
   };
   $('quote').style.display = quotes.length ? '' : 'none';
   clearInterval(renderPage._quoteTimer);

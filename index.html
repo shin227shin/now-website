@@ -41,27 +41,32 @@
 </header>
 
 <section id="community"><div class="wrap">
-  <h2 id="intro-title"></h2>
-  <p class="lead" id="tagline"></p>
-  <div class="chips" id="chips"></div>
-  <div class="quote" id="quote"></div>
+  <div class="sec-head reveal">
+    <div><div class="idx">Community</div><h2 id="intro-title"></h2></div>
+    <p class="lead" id="tagline"></p>
+  </div>
+  <div class="chips reveal" id="chips"></div>
+  <div class="quote reveal" id="quote"></div>
 </div></section>
 
 <section class="acts" id="activities"><div class="wrap">
-  <h2 id="activities-title"></h2>
-  <div class="grid" id="cards"></div>
+  <div class="sec-head reveal"><div><div class="idx">Activities</div><h2 id="activities-title"></h2></div></div>
+  <div class="grid reveal" id="cards"></div>
 </div></section>
 
 <section class="next" id="next"><div class="wrap">
-  <h2 id="nextup-title"></h2>
-  <div class="ticket" id="ticket"></div>
+  <div class="sec-head reveal"><div><div class="idx">Schedule</div><h2 id="nextup-title"></h2></div></div>
+  <div class="ticket reveal" id="ticket"></div>
 </div></section>
 
-<section id="join"><div class="wrap">
-  <h2 id="join-title"></h2>
-  <p class="lead" id="join-sub"></p>
-  <div class="rec"><p id="join-rec"></p></div>
-  <div class="join-grid">
+<section id="join"><div class="wrap join-split">
+  <div class="join-intro reveal">
+    <div class="idx">Join</div>
+    <h2 id="join-title"></h2>
+    <p class="lead" id="join-sub"></p>
+    <div class="rec"><p id="join-rec"></p></div>
+  </div>
+  <div class="join-side reveal">
     <div class="need"><div class="eyebrow" id="need-title"></div><ul id="need-list"></ul></div>
     <div class="contact" id="contact"></div>
   </div>
@@ -94,6 +99,13 @@ if (new URLSearchParams(location.search).has('preview')) {
 const nav = document.getElementById('nav'), hero = document.getElementById('top');
 const onScroll = () => nav.classList.toggle('solid', window.scrollY > hero.offsetHeight - 70);
 addEventListener('scroll', onScroll, { passive: true }); onScroll();
+
+// Sections fade up gently as they come into view
+if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  document.documentElement.classList.add('js-reveal');
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -10% 0px' });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+}
 </script>
 </body>
 </html>
