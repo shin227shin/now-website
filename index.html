@@ -43,6 +43,8 @@ if (!new URLSearchParams(location.search).has('preview') && !location.hash && !m
   <div class="map"><div class="globe" id="globe">
     <canvas></canvas>
     <svg xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="pin-glow"><stop offset="0" stop-color="#FFB08F" stop-opacity=".95"/><stop offset=".3" stop-color="#FF9A76" stop-opacity=".45"/><stop offset="1" stop-color="#D97757" stop-opacity="0"/></radialGradient></defs><g id="pins"></g></svg>
+    <div class="zoom"><button type="button" aria-label="Zoom in">+</button><button type="button" aria-label="Zoom out">−</button></div>
+    <div class="globe-hint" aria-hidden="true">Hold Ctrl and scroll to zoom</div>
   </div></div>
   <div class="stats" id="stats">
     <div class="stat"><b id="members"></b><span>Members</span></div>

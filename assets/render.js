@@ -126,6 +126,7 @@ function mapTips(g) {
     if (e.key === 'Escape') hide();
   });
   addEventListener('resize', hide);
+  map.addEventListener('globe-move', hide); // the globe was dragged or zoomed (globe.js)
 }
 
 function renderCard(a, c) {

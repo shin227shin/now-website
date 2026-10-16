@@ -2,19 +2,22 @@
 // No photo: the surface is painted here from Natural Earth coastlines (public domain, assets/data/land-50m.json)
 // with soft colours for forests, deserts and ice, a little relief noise and thin clouds, then wrapped on a sphere with WebGL.
 // render.js puts the pins into #pins and calls heroGlobe.update(); this file moves them with the globe.
-// Drag to turn it. It stops turning while a country label is open (.map.hold, set in render.js).
+// Drag to turn it; zoom with the + / − buttons, Ctrl (⌘) + scroll, a trackpad or two-finger pinch, or a double-click.
+// Zoomed in, dragging up and down shows the north and the south. It stops turning while a country label is open (.map.hold, set in render.js).
+// The canvas spans the full width of the screen so a zoomed-in globe can grow past its square.
 const heroGlobe = (function () {
   const stage = document.getElementById('globe');
   if (!stage) return { update() {} };
   const cv = stage.querySelector('canvas'), svg = stage.querySelector('svg'), map = stage.closest('.map');
   const TILT = .38;             // we look from a little north of the equator, so Europe sits well in view
-  const R = 1 / 1.24;           // globe radius as a share of half the canvas (the rest is room for the glow)
+  const ZMAX = 3.5;
   const SPEED = -2 * Math.PI / 70; // one turn in 70 s; minus = the surface moves west to east, like the real Earth
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let spin = 15 * Math.PI / 180, pins = [], size = 0, gl, draw;
+  let spin = 15 * Math.PI / 180, tilt = TILT, zoom = 1, zoomTo = 1, pins = [], size = 0, cw = 0, ch = 0, gl, draw;
 
-  // ---------- Painting the surface (equirectangular, 2048 × 1024) ----------
-  const W = 2048, H = 1024;
+  // ---------- Painting the surface (equirectangular, 4096 × 2048 on bigger screens so zooming in stays sharp) ----------
+  const big = innerWidth > 700 && (() => { const g = document.createElement('canvas').getContext('webgl'); return g && g.getParameter(g.MAX_TEXTURE_SIZE) >= 4096; })();
+  const W = big ? 4096 : 2048, H = W / 2, K = W / 2048, NW = 1024, NH = 512; // K = line and blur size; NW × NH = relief and clouds
   const X = lon => (lon + 180) / 360 * W, Y = lat => (90 - lat) / 180 * H;
   const rand = (seed => () => ((seed = (seed + 0x6D2B79F5) | 0, seed = Math.imul(seed ^ (seed >>> 15), seed | 1),
     seed ^= seed + Math.imul(seed ^ (seed >>> 7), seed | 61), ((seed ^ (seed >>> 14)) >>> 0) / 4294967296)))(7);
@@ -66,14 +69,14 @@ const heroGlobe = (function () {
   function paint(topo) {
     const land = landPath(topo);
     const make = (w = W, h = H) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return [c, c.getContext('2d')]; };
-    const [tex, t] = make(), [mask, m] = make(W / 2, H / 2), [cloud, cl] = make(W / 2, H / 2);
+    const [tex, t] = make(), [mask, m] = make(W / 2, H / 2), [cloud, cl] = make(NW, NH);
 
     // Sea: deep blue, a bit lighter toward the equator, with lighter shallow water along the coasts
     const sea = t.createLinearGradient(0, 0, 0, H);
     [[0, '#0b2448'], [.3, '#0f3a72'], [.5, '#14548f'], [.7, '#0f3a72'], [1, '#0b2448']].forEach(s => sea.addColorStop(...s));
     t.fillStyle = sea; t.fillRect(0, 0, W, H);
-    t.filter = 'blur(7px)'; t.strokeStyle = 'rgba(70,160,200,.55)'; t.lineWidth = 9; t.stroke(land);
-    t.filter = 'blur(2px)'; t.strokeStyle = 'rgba(110,200,220,.45)'; t.lineWidth = 3; t.stroke(land);
+    t.filter = `blur(${7 * K}px)`; t.strokeStyle = 'rgba(70,160,200,.55)'; t.lineWidth = 9 * K; t.stroke(land);
+    t.filter = `blur(${2 * K}px)`; t.strokeStyle = 'rgba(110,200,220,.45)'; t.lineWidth = 3 * K; t.stroke(land);
     t.filter = 'none';
 
     // Land: colour by latitude first (ice, tundra, forest, dry belts, jungle) ...
@@ -84,7 +87,7 @@ const heroGlobe = (function () {
      [-50, '#6f7b5c'], [-58, '#dfe6ea'], [-90, '#f1f5f8']].forEach(([lat, c]) => band.addColorStop((90 - lat) / 180, c));
     t.fillStyle = band; t.fillRect(0, 0, W, H);
     // ... then soft patches for the big deserts, rain forests, mountains and ice sheets
-    t.filter = 'blur(26px)';
+    t.filter = `blur(${26 * K}px)`;
     const patch = (lon1, lat1, lon2, lat2, c, a = 1) => {
       t.globalAlpha = a; t.fillStyle = c;
       t.beginPath(); t.ellipse((X(lon1) + X(lon2)) / 2, (Y(lat1) + Y(lat2)) / 2, Math.abs(X(lon2) - X(lon1)) / 2, Math.abs(Y(lat2) - Y(lat1)) / 2, 0, 0, 7); t.fill();
@@ -102,7 +105,7 @@ const heroGlobe = (function () {
     patch(-80, 82, -60, 70, '#d4dcdf', .8); patch(90, 82, 150, 72, '#c9d1d0', .6);         // Arctic islands
     t.globalAlpha = 1; t.filter = 'none';
     // Relief: big and small lumps, so the land is not flat colour
-    const [rel, r] = make(W / 2, H / 2), n = noise(W / 2, H / 2, 6), img = r.createImageData(W / 2, H / 2);
+    const [rel, r] = make(NW, NH), n = noise(NW, NH, 6), img = r.createImageData(NW, NH);
     for (let i = 0; i < n.length; i++) {
       const v = Math.max(0, Math.min(255, (n[i] - .5) * 2.4 * 255 + 128));
       img.data[i * 4] = img.data[i * 4 + 1] = img.data[i * 4 + 2] = v; img.data[i * 4 + 3] = 255;
@@ -111,17 +114,17 @@ const heroGlobe = (function () {
     t.globalCompositeOperation = 'soft-light'; t.drawImage(rel, 0, 0, W, H);
     t.globalCompositeOperation = 'source-over'; t.restore();
     // A faint lighter line right on the coast
-    t.strokeStyle = 'rgba(230,220,180,.25)'; t.lineWidth = 1; t.stroke(land);
+    t.strokeStyle = 'rgba(230,220,180,.25)'; t.lineWidth = K; t.stroke(land);
 
     // Land / sea mask (the sea gets a soft shine from the sun)
     m.scale(.5, .5); m.fillStyle = '#fff'; m.fill(land, 'evenodd');
 
     // Thin clouds: wispy, more of them in the stormy belts, fewer over the deserts
-    const c = noise(W / 2, H / 2, 6), ci = cl.createImageData(W / 2, H / 2);
-    for (let y = 0; y < H / 2; y++) {
-      const lat = 90 - y / (H / 2) * 180, belt = .62 - .1 * Math.cos(lat / 90 * Math.PI * 3) + .04 * Math.abs(lat) / 90;
-      for (let x = 0; x < W / 2; x++) {
-        const i = y * W / 2 + x, v = Math.max(0, Math.min(1, (c[i] - belt) / .12));
+    const c = noise(NW, NH, 6), ci = cl.createImageData(NW, NH);
+    for (let y = 0; y < NH; y++) {
+      const lat = 90 - y / NH * 180, belt = .62 - .1 * Math.cos(lat / 90 * Math.PI * 3) + .04 * Math.abs(lat) / 90;
+      for (let x = 0; x < NW; x++) {
+        const i = y * NW + x, v = Math.max(0, Math.min(1, (c[i] - belt) / .12));
         ci.data[i * 4] = v * v * 255; ci.data[i * 4 + 3] = 255;
       }
     }
@@ -132,10 +135,10 @@ const heroGlobe = (function () {
   // ---------- Drawing the sphere ----------
   const VS = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
   const FS = `precision highp float;
-uniform sampler2D tex,mask,cloud;uniform vec2 res;uniform float spin,tilt,R,ready;
+uniform sampler2D tex,mask,cloud;uniform vec2 res;uniform float spin,tilt,Rp,ready;
 const vec3 L=vec3(-.52,.46,.72);
 void main(){
-  vec2 p=(gl_FragCoord.xy/res*2.-1.)/R;float q=dot(p,p),d=sqrt(q),px=2./(res.x*R);
+  vec2 p=(gl_FragCoord.xy-res*.5)/Rp;float q=dot(p,p),d=sqrt(q),px=1./Rp;
   vec3 l=normalize(L);
   float out_=max(d-1.,0.);
   float side=.45+.55*clamp(dot(normalize(p),normalize(l.xy))*.5+.6,0.,1.);
@@ -174,11 +177,12 @@ void main(){
     gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     const u = n => gl.getUniformLocation(prog, n);
     ['tex', 'mask', 'cloud'].forEach((n, i) => gl.uniform1i(u(n), i));
-    gl.uniform1f(u('tilt'), TILT); gl.uniform1f(u('R'), R); gl.uniform1f(u('ready'), 0);
+    gl.uniform1f(u('ready'), 0);
     gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     draw = () => {
       gl.viewport(0, 0, cv.width, cv.height);
       gl.uniform2f(u('res'), cv.width, cv.height); gl.uniform1f(u('spin'), spin);
+      gl.uniform1f(u('tilt'), tilt); gl.uniform1f(u('Rp'), size / 2 * zoom * cv.width / cw);
       gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     };
@@ -197,7 +201,7 @@ void main(){
 
   // ---------- Pins ----------
   function placePins() {
-    const half = size / 2, rad = half * R, ct = Math.cos(TILT), st = Math.sin(TILT);
+    const rad = size / 2 * zoom, ct = Math.cos(tilt), st = Math.sin(tilt);
     for (const p of pins) {
       const la = p.lat * Math.PI / 180, lo = p.lon * Math.PI / 180 - spin;
       const wx = Math.cos(la) * Math.sin(lo), wy = Math.sin(la), wz = Math.cos(la) * Math.cos(lo);
@@ -206,44 +210,89 @@ void main(){
       if (show !== p.shown) { p.el.style.display = show ? '' : 'none'; p.shown = show; }
       if (!show) continue;
       const k = .55 + .45 * Math.min(1, nz * 1.6); // smaller and fainter toward the edge of the globe
-      p.el.setAttribute('transform', `translate(${(half + wx * rad).toFixed(1)} ${(half - ny * rad).toFixed(1)}) scale(${k.toFixed(3)})`);
+      p.el.setAttribute('transform', `translate(${(cw / 2 + wx * rad).toFixed(1)} ${(ch / 2 - ny * rad).toFixed(1)}) scale(${k.toFixed(3)})`);
       p.el.style.opacity = Math.min(1, nz * 4).toFixed(2);
     }
   }
 
   function fit() {
-    const s = cv.getBoundingClientRect().width, dpr = Math.min(devicePixelRatio || 1, 2);
-    if (!s) return;
-    size = s;
-    cv.width = cv.height = Math.round(s * dpr);
-    svg.setAttribute('viewBox', `0 0 ${s} ${s}`);
+    const b = cv.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2);
+    if (!b.width) return;
+    size = stage.offsetWidth; cw = b.width; ch = b.height;
+    cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr);
+    svg.setAttribute('viewBox', `0 0 ${cw} ${ch}`);
   }
 
   // ---------- Turning ----------
-  let last = 0, drag = null, visible = true;
+  let last = 0, drag = null, pinch = null, visible = true;
+  const touches = new Map();
   function frame(now) {
     const dt = Math.min(.05, (now - (last || now)) / 1000); last = now;
-    if (!drag && !still && !map.classList.contains('hold')) spin += SPEED * dt;
+    if (!drag && !touches.size && !still && !map.classList.contains('hold')) spin += SPEED * (zoomTo > 1 ? .3 : 1) * dt;
+    zoom += (zoomTo - zoom) * Math.min(1, dt * 9);
+    if (zoomTo === 1 && !drag) tilt += (TILT - tilt) * Math.min(1, dt * 4); // back to the usual view when zoomed out
     draw?.(); placePins();
     if (visible || drag) requestAnimationFrame(frame); else last = 0;
   }
+
+  const moved = () => map.dispatchEvent(new Event('globe-move')); // closes an open country label (render.js)
+  const [zin, zout] = stage.querySelectorAll('.zoom button');
+  function setZoom(z) {
+    zoomTo = Math.max(1, Math.min(ZMAX, z));
+    if (zoomTo < 1.02) zoomTo = 1;
+    stage.classList.toggle('zoomed', zoomTo > 1); // zoomed in, a finger drag turns the globe instead of scrolling the page
+    zin.disabled = zoomTo >= ZMAX; zout.disabled = zoomTo === 1;
+    moved();
+  }
+  zin.addEventListener('click', () => setZoom(zoomTo * 1.6));
+  zout.addEventListener('click', () => setZoom(zoomTo / 1.6));
+  zout.disabled = true;
+  // Is a point on the globe itself (not the empty space around it)?
+  const onGlobe = e => { const b = cv.getBoundingClientRect(); return Math.hypot(e.clientX - b.left - cw / 2, e.clientY - b.top - ch / 2) < size / 2 * zoom; };
+  stage.addEventListener('dblclick', e => { if (onGlobe(e) && !e.target.closest('.pin-g,.zoom')) setZoom(zoomTo * 1.8); });
+  // Ctrl / ⌘ + scroll and trackpad pinch zoom; a plain scroll keeps scrolling the page (with a short hint)
+  const hint = stage.querySelector('.globe-hint');
+  if (/Mac|iP/.test(navigator.platform)) hint.textContent = hint.textContent.replace('Ctrl', '⌘');
+  let hintT;
+  stage.addEventListener('wheel', e => {
+    if (!onGlobe(e)) return;
+    if (e.ctrlKey || e.metaKey) { e.preventDefault(); setZoom(zoomTo * Math.exp(-e.deltaY * (Math.abs(e.deltaY) < 30 ? .02 : .004))); return; }
+    stage.classList.add('hint'); clearTimeout(hintT); hintT = setTimeout(() => stage.classList.remove('hint'), 1400);
+  }, { passive: false });
   if ('IntersectionObserver' in window) new IntersectionObserver(([e]) => {
     const was = visible; visible = e.isIntersecting;
     if (visible && !was) requestAnimationFrame(frame);
   }).observe(stage);
 
   stage.addEventListener('pointerdown', e => {
-    if (e.button || e.target.closest('.pin-g')) return;
-    drag = { x: e.clientX, spin, moved: false };
+    if (e.button || e.target.closest('.pin-g,.zoom') || !onGlobe(e)) return;
+    if (e.pointerType === 'touch') touches.set(e.pointerId, [e.clientX, e.clientY]);
+    if (touches.size === 2) { // two fingers: pinch to zoom
+      const [a, b] = [...touches.values()];
+      drag = null; pinch = { d: Math.hypot(a[0] - b[0], a[1] - b[1]), z: zoomTo };
+      return;
+    }
+    drag = { x: e.clientX, y: e.clientY, spin, tilt, id: e.pointerId };
     stage.setPointerCapture(e.pointerId); stage.classList.add('dragging');
   });
   stage.addEventListener('pointermove', e => {
-    if (!drag) return;
-    const dx = e.clientX - drag.x;
-    if (Math.abs(dx) > 3) drag.moved = true;
-    spin = drag.spin - dx / (size / 2 * R); // the surface follows the finger
+    if (touches.has(e.pointerId)) touches.set(e.pointerId, [e.clientX, e.clientY]);
+    if (pinch && touches.size === 2) {
+      const [a, b] = [...touches.values()];
+      return setZoom(pinch.z * Math.hypot(a[0] - b[0], a[1] - b[1]) / pinch.d);
+    }
+    if (!drag || e.pointerId !== drag.id) return;
+    const r = size / 2 * zoom, dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (Math.hypot(dx, dy) > 4) moved();
+    spin = drag.spin - dx / r; // the surface follows the finger
+    // Up and down: always with a mouse, and with a finger once zoomed in (otherwise that is a page scroll)
+    if (e.pointerType === 'mouse' || zoomTo > 1) tilt = Math.max(-1.2, Math.min(1.35, drag.tilt + dy / r));
   });
-  const end = () => { if (drag) { drag = null; stage.classList.remove('dragging'); } };
+  const end = e => {
+    touches.delete(e.pointerId);
+    if (touches.size < 2) pinch = null;
+    if (drag && e.pointerId === drag.id) { drag = null; stage.classList.remove('dragging'); }
+  };
   stage.addEventListener('pointerup', end); stage.addEventListener('pointercancel', end);
 
   fit();

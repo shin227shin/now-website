@@ -47,10 +47,21 @@ body{counter-reset:sec}
   background:radial-gradient(900px 600px at 85% 0%,#2a2350 0%,transparent 60%),radial-gradient(800px 700px at 0% 60%,#1d2f55 0%,transparent 60%),linear-gradient(180deg,#0e1226 0%,#0a0c18 100%)}
 .map{position:relative;max-width:1280px;margin:0 auto;padding:0 24px}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-/* Turning globe (assets/globe.js). The canvas and the pin layer reach past the globe to leave room for its glow. */
+/* Turning globe (assets/globe.js). The canvas and the pin layer span the full screen width (room for the glow and for zooming in)
+   and fade out at the top and bottom. */
 .globe{position:relative;width:min(620px,86vw,calc(100svh - 270px));min-width:280px;aspect-ratio:1;margin:28px auto 0;touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
+.globe.zoomed{touch-action:none}
 .globe.dragging{cursor:grabbing}
-.globe canvas,.globe svg{position:absolute;left:-12%;top:-12%;width:124%;height:124%;display:block}
+.globe canvas,.globe svg{position:absolute;left:calc(50% - 50vw);top:-12%;width:100vw;height:124%;display:block;
+  -webkit-mask-image:linear-gradient(transparent,#000 9%,#000 91%,transparent);mask-image:linear-gradient(transparent,#000 9%,#000 91%,transparent)}
+.zoom{position:absolute;right:-8px;bottom:4px;z-index:1;display:flex;flex-direction:column;gap:8px}
+.zoom button{width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,.22);background:rgba(14,18,38,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  color:#fff;font:500 22px/1 Inter,sans-serif;cursor:pointer;transition:background .2s,opacity .2s}
+.zoom button:hover{background:rgba(255,154,118,.3);border-color:rgba(255,154,118,.6)}
+.zoom button:disabled{opacity:.35;cursor:default;background:rgba(14,18,38,.6);border-color:rgba(255,255,255,.22)}
+.globe-hint{position:absolute;left:50%;top:50%;z-index:1;transform:translate(-50%,-50%);padding:10px 18px;border-radius:99px;background:rgba(14,18,38,.75);
+  font-size:13px;font-weight:500;color:#fff;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .3s}
+.globe.hint .globe-hint{opacity:1}
 .globe canvas{opacity:0;transition:opacity 1.2s ease}
 .globe.ready canvas{opacity:1}
 .globe.flat{border-radius:50%;background:radial-gradient(circle at 35% 30%,#3d78c4,#123a74 60%,#08193a);box-shadow:0 0 60px rgba(90,150,255,.35)}
