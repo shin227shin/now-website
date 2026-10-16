@@ -53,7 +53,12 @@ body{counter-reset:sec}
 .globe.zoomed{touch-action:none}
 .globe.dragging{cursor:grabbing}
 .globe canvas,.globe svg{position:absolute;left:calc(50% - 50vw);top:-12%;width:100vw;height:124%;display:block;
-  -webkit-mask-image:linear-gradient(transparent,#000 9%,#000 91%,transparent);mask-image:linear-gradient(transparent,#000 9%,#000 91%,transparent)}
+  --fade-a:91%;--fade-b:100%;transition:--fade-a .5s ease,--fade-b .5s ease;
+  -webkit-mask-image:linear-gradient(transparent,#000 9%,#000 var(--fade-a),transparent var(--fade-b));mask-image:linear-gradient(transparent,#000 9%,#000 var(--fade-a),transparent var(--fade-b))}
+/* Zoomed in, the globe fades out just above the numbers (the bottom of the globe's square is at 90% of the canvas) */
+.globe.zoomed canvas,.globe.zoomed svg{--fade-a:80%;--fade-b:89%}
+@property --fade-a{syntax:"<percentage>";inherits:false;initial-value:91%}
+@property --fade-b{syntax:"<percentage>";inherits:false;initial-value:100%}
 .zoom{position:absolute;right:-8px;bottom:4px;z-index:1;display:flex;flex-direction:column;gap:8px}
 .zoom button{width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,.22);background:rgba(14,18,38,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
   color:#fff;font:500 22px/1 Inter,sans-serif;cursor:pointer;transition:background .2s,opacity .2s}

@@ -205,12 +205,13 @@ void main(){
     for (const p of pins) {
       const la = p.lat * Math.PI / 180, lo = p.lon * Math.PI / 180 - spin;
       const wx = Math.cos(la) * Math.sin(lo), wy = Math.sin(la), wz = Math.cos(la) * Math.cos(lo);
-      const ny = wy * ct - wz * st, nz = wy * st + wz * ct;
-      const show = nz > 0;
+      const ny = wy * ct - wz * st, nz = wy * st + wz * ct, y = ch / 2 - ny * rad;
+      // Zoomed in, pins below the globe's square sit in the faded-out part above the numbers (style.css)
+      const show = nz > 0 && !(zoomTo > 1 && y > ch / 2 + size / 2 - 20);
       if (show !== p.shown) { p.el.style.display = show ? '' : 'none'; p.shown = show; }
       if (!show) continue;
       const k = .55 + .45 * Math.min(1, nz * 1.6); // smaller and fainter toward the edge of the globe
-      p.el.setAttribute('transform', `translate(${(cw / 2 + wx * rad).toFixed(1)} ${(ch / 2 - ny * rad).toFixed(1)}) scale(${k.toFixed(3)})`);
+      p.el.setAttribute('transform', `translate(${(cw / 2 + wx * rad).toFixed(1)} ${y.toFixed(1)}) scale(${k.toFixed(3)})`);
       p.el.style.opacity = Math.min(1, nz * 4).toFixed(2);
     }
   }
