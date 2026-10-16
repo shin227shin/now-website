@@ -1,5 +1,5 @@
 // Admin dashboard: log in, edit every part of the content, see it live, save to Netlify.
-// Uses esc / ICONS / nextStart / dayLabel / tzLabel / hm / totals from render.js and COUNTRIES / countryPin from countries.js.
+// Uses esc / ICONS / nextStart / dayLabel / tzLabel / hm / totals from render.js and COUNTRIES / countryLatLon from countries.js.
 
 const DEFAULT_URL = '/data/default-content.json';
 const DEFAULT_PHOTO = 'assets/img/contact.jpg';
@@ -223,8 +223,8 @@ function countriesSection() {
       <input ${attr(`countries.${i}.name`, 'text')} value="${esc(x.name)}" list="country-names" placeholder="Country name">
       <div class="count">${btn('dec', 'countries', i, '−', '')}<input type="number" min="1" ${attr(`countries.${i}.count`, 'num')} value="${Number(x.count) || 0}">${btn('inc', 'countries', i, '+', '')}</div>
       ${btn('remove', 'countries', i, '✕', 'icon danger', 'Remove country')}
-      ${(known || !x.name) && !pin ? '' : `<div class="ctry-extra">${known ? '' : '<span class="warn">Not on the built-in map list.</span>'} Map position x, y:
-        <input ${attr(`countries.${i}.pin`, 'pair')} value="${esc(pin)}" placeholder="e.g. 640, 260"> <span>(map is 1197 × 679)</span></div>`}
+      ${(known || !x.name) && !pin ? '' : `<div class="ctry-extra">${known ? '' : '<span class="warn">Not on the built-in map list.</span>'} Globe position lat, lon:
+        <input ${attr(`countries.${i}.pin`, 'pair')} value="${esc(pin)}" placeholder="e.g. 35.7, 139.7"> <span>(degrees; south and west are minus)</span></div>`}
     </div>`;
   }).join('');
   return section('countries', 'top', 'Members &amp; countries', `
@@ -232,7 +232,7 @@ function countriesSection() {
     <div>${rows}</div>
     <button type="button" class="add" data-act="add" data-list="countries">+ Add country</button>
     <datalist id="country-names">${Object.keys(COUNTRIES).sort().map(n => `<option value="${esc(n)}">`).join('')}</datalist>
-    <div class="hint">The totals, the map pins and the country chips all follow this list. Pins are placed automatically for countries on the built-in list.</div>
+    <div class="hint">The totals, the globe pins and the country chips all follow this list. Pins are placed automatically for countries on the built-in list.</div>
     <div class="sub-h">Override the totals (optional)</div>
     <div class="row">${num('Members shown', 'stats.membersOverride', { nullable: true, ph: 'auto' })}${num('Countries shown', 'stats.countriesOverride', { nullable: true, ph: 'auto' })}</div>
     <div class="hint">Leave empty to count automatically.</div>`, 'countries-note');

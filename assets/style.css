@@ -47,7 +47,17 @@ body{counter-reset:sec}
   background:radial-gradient(900px 600px at 85% 0%,#2a2350 0%,transparent 60%),radial-gradient(800px 700px at 0% 60%,#1d2f55 0%,transparent 60%),linear-gradient(180deg,#0e1226 0%,#0a0c18 100%)}
 .map{position:relative;max-width:1280px;margin:0 auto;padding:0 24px}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-.map svg{display:block;width:100%;height:auto}
+/* Turning globe (assets/globe.js). The canvas and the pin layer reach past the globe to leave room for its glow. */
+.globe{position:relative;width:min(620px,86vw,calc(100svh - 270px));min-width:280px;aspect-ratio:1;margin:28px auto 0;touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
+.globe.dragging{cursor:grabbing}
+.globe canvas,.globe svg{position:absolute;left:-12%;top:-12%;width:124%;height:124%;display:block}
+.globe canvas{opacity:0;transition:opacity 1.2s ease}
+.globe.ready canvas{opacity:1}
+.globe.flat{border-radius:50%;background:radial-gradient(circle at 35% 30%,#3d78c4,#123a74 60%,#08193a);box-shadow:0 0 60px rgba(90,150,255,.35)}
+.globe svg{pointer-events:none;overflow:visible}
+.globe .pin-g{pointer-events:auto}
+.halo{animation:glow 2.6s ease-in-out infinite}
+@keyframes glow{0%,100%{opacity:.75}50%{opacity:1}}
 .pin{animation:pulse 2.6s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
 @keyframes pulse{0%,100%{opacity:.28;transform:scale(1)}50%{opacity:.55;transform:scale(1.45)}}
 .pin-g{cursor:pointer;outline:none}
@@ -77,7 +87,7 @@ html.intro .intro-ov{display:block;position:fixed;inset:0;z-index:20;background:
 html.intro.landed .intro-ov{opacity:0;pointer-events:none}
 html.intro:not(.landed){overflow:hidden}
 html.intro .hero>*,html.intro .nav{opacity:0}
-html.intro .map{transform:scale(1.08)}
+html.intro .map{transform:scale(1.12)}
 html.intro .pin-g{opacity:0}
 html.intro.landed .hero>*,html.intro.landed .nav{opacity:1;transition:opacity 1s ease .5s}
 html.intro.landed .hero .map{transform:none;transition:opacity 1.2s ease,transform 1.8s cubic-bezier(.2,.7,.2,1)}

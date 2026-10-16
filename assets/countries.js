@@ -1,10 +1,4 @@
-// Country positions on the full-world dot map (viewBox 0 0 1197 679).
-// The dots were made with the "dotted-map" package (Web Mercator, lat -56..78, lng -169..180),
-// scaled to the same dot size and spacing as "CCE Poster v2.html".
-
-const MAP_W = 1197, MAP_H = 679;
-const MAP_REGION = { latMin: -56, latMax: 78, lngMin: -169, lngMax: 180 };
-const MAP_INNER = { x: 3.5, y: 3.5, w: 1190, h: 672 };
+// Where each country sits on the hero globe (assets/globe.js): latitude / longitude of a point near its middle.
 
 const COUNTRIES = {
   // Current members
@@ -85,18 +79,9 @@ const COUNTRIES = {
   'Costa Rica':    { lat: 9.7,   lon: -83.8 }
 };
 
-function mercY(lat) {
-  return Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360));
-}
-
-// Returns [x, y] on the map, or null when the country is unknown or outside the map.
-function countryPin(name, override) {
+// Returns [lat, lon], or null when the country is unknown and has no position set by hand.
+function countryLatLon(name, override) {
   if (override && override.length === 2) return override;
   const c = COUNTRIES[name];
-  if (!c) return null;
-  const r = MAP_REGION;
-  if (c.lat < r.latMin || c.lat > r.latMax || c.lon < r.lngMin || c.lon > r.lngMax) return null;
-  const x = MAP_INNER.x + (MAP_INNER.w * (c.lon - r.lngMin)) / (r.lngMax - r.lngMin);
-  const y = MAP_INNER.y + (MAP_INNER.h * (mercY(r.latMax) - mercY(c.lat))) / (mercY(r.latMax) - mercY(r.latMin));
-  return [Math.round(x * 10) / 10, Math.round(y * 10) / 10];
+  return c ? [c.lat, c.lon] : null;
 }
