@@ -26,6 +26,50 @@
 
   const clamp = v => Math.max(0, Math.min(1, v));
 
+  // Earth globe: NASA "Blue Marble" photo (public domain, assets/img/earth.jpg) wrapped on a sphere,
+  // lit by the sun from the upper left, with a thin blue atmosphere at the edge.
+  // Drawn into a small canvas once per frame and then scaled to the size on screen.
+  const S = 512, earth = { cv: document.createElement('canvas'), ready: false };
+  earth.cv.width = earth.cv.height = S;
+  const ectx = earth.cv.getContext('2d'), out = ectx.createImageData(S, S);
+  const tex = new Image();
+  tex.onload = () => {
+    const c = document.createElement('canvas');
+    c.width = tex.width; c.height = tex.height;
+    c.getContext('2d').drawImage(tex, 0, 0);
+    earth.tex = c.getContext('2d').getImageData(0, 0, c.width, c.height);
+    // Per pixel of the disk: longitude offset, texture row, sunlight, and how close to the edge it is
+    const tilt = .41, ct = Math.cos(tilt), st = Math.sin(tilt); // Earth's axis leans about 23°
+    const L = [-.68, -.42, .6], idx = [], lon = [], row = [], sun = [], rim = [];
+    for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
+      const nx = (x + .5) / S * 2 - 1, ny = (y + .5) / S * 2 - 1, q = nx * nx + ny * ny;
+      if (q >= 1) continue;
+      const nz = Math.sqrt(1 - q), ax = nx * ct + ny * st, ay = -nx * st + ny * ct;
+      idx.push((y * S + x) * 4);
+      lon.push(Math.atan2(ax, nz) / (2 * Math.PI));
+      row.push(Math.min(c.height - 1, Math.floor((Math.asin(ay) / Math.PI + .5) * c.height)));
+      const l = nx * L[0] + ny * L[1] + nz * L[2];
+      sun.push(.04 + 1.05 * clamp(l * 1.6 + .08)); // soft edge between day and night
+      rim.push(Math.pow(1 - nz, 2.2) * .7);
+    }
+    Object.assign(earth, { idx, lon: Float32Array.from(lon), row: Int32Array.from(row), sun: Float32Array.from(sun), rim: Float32Array.from(rim), ready: true });
+  };
+  tex.src = 'assets/img/earth.jpg';
+
+  function drawEarth(turn) {
+    const { tex: { data: T, width: TW }, idx, lon, row, sun, rim } = earth, D = out.data;
+    for (let i = 0; i < idx.length; i++) {
+      let u = lon[i] + turn / (2 * Math.PI) + .5;
+      u -= Math.floor(u);
+      const s = (row[i] * TW + Math.floor(u * TW)) * 4, o = idx[i], k = sun[i], a = rim[i];
+      D[o] = T[s] * k * (1 - a) + 110 * a * Math.min(1, k + .15);
+      D[o + 1] = T[s + 1] * k * (1 - a) + 170 * a * Math.min(1, k + .15);
+      D[o + 2] = T[s + 2] * k * (1 - a) + 255 * a * Math.min(1, k + .15);
+      D[o + 3] = 255;
+    }
+    ectx.putImageData(out, 0, 0);
+  }
+
   function frame(now) {
     t0 ??= now;
     const t = (now - t0) / 1000, cx = w / 2, cy = h / 2, view = Math.max(w, h);
@@ -51,21 +95,23 @@
       }
     }
 
-    // Earth: a tiny blue point far away that grows fast at the end
+    // Earth: small and far away at first, then it grows fast at the end
     const d = Math.max(.003, 1 - .997 * Math.pow(clamp(t / 2.5), 2));
-    const r = 2.6 / d;
-    const halo = ctx.createRadialGradient(cx, cy, 0, cx, cy, r * 7);
-    halo.addColorStop(0, 'rgba(160,205,255,.55)');
-    halo.addColorStop(.35, 'rgba(255,154,118,.12)');
-    halo.addColorStop(1, 'rgba(255,154,118,0)');
+    const r = 14 / d;
+    // Thin atmosphere glow just outside the edge
+    const halo = ctx.createRadialGradient(cx, cy, r * .98, cx, cy, r * 1.18);
+    halo.addColorStop(0, 'rgba(120,180,255,.55)');
+    halo.addColorStop(.35, 'rgba(90,150,255,.18)');
+    halo.addColorStop(1, 'rgba(90,150,255,0)');
     ctx.fillStyle = halo;
-    ctx.beginPath(); ctx.arc(cx, cy, r * 7, 0, 6.29); ctx.fill();
-    const core = ctx.createRadialGradient(cx - r * .3, cy - r * .3, 0, cx, cy, r);
-    core.addColorStop(0, '#ffffff');
-    core.addColorStop(.45, '#9fd0ff');
-    core.addColorStop(1, 'rgba(60,120,220,.9)');
-    ctx.fillStyle = core;
-    ctx.beginPath(); ctx.arc(cx, cy, r, 0, 6.29); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx, cy, r * 1.18, 0, 6.29); ctx.fill();
+    if (earth.ready) {
+      drawEarth(.95 - t * .12); // the globe turns slowly (Europe, Africa and Asia face us)
+      ctx.drawImage(earth.cv, cx - r, cy - r, r * 2, r * 2);
+    } else {
+      ctx.fillStyle = '#4f86d9';
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, 6.29); ctx.fill();
+    }
 
     // Flash of light as we reach it: spreads out from Earth until it covers the screen
     const flash = clamp((t - 2.25) / .35);
