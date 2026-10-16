@@ -26,18 +26,15 @@
 
   const clamp = v => Math.max(0, Math.min(1, v));
 
-  // Earth globe: NASA "Blue Marble" photo (public domain, assets/img/earth.jpg) wrapped on a sphere,
-  // lit by the sun from the upper left, with a thin blue atmosphere at the edge.
-  // Drawn into a small canvas once per frame and then scaled to the size on screen.
+  // Earth globe: the same painted surface and clouds as the hero globe (heroGlobe.surface from globe.js, ready a moment
+  // after the page starts) wrapped on a sphere, lit by the sun from the upper left, with a thin blue atmosphere at the edge.
+  // Drawn into a small canvas once per frame and then scaled to the size on screen. Until the surface is ready: a plain blue ball.
   const S = 512, earth = { cv: document.createElement('canvas'), ready: false };
   earth.cv.width = earth.cv.height = S;
   const ectx = earth.cv.getContext('2d'), out = ectx.createImageData(S, S);
-  const tex = new Image();
-  tex.onload = () => {
-    const c = document.createElement('canvas');
-    c.width = tex.width; c.height = tex.height;
-    c.getContext('2d').drawImage(tex, 0, 0);
-    earth.tex = c.getContext('2d').getImageData(0, 0, c.width, c.height);
+  const pixels = cv => cv.getContext('2d').getImageData(0, 0, cv.width, cv.height);
+  const setup = ({ tex, cloud }) => {
+    earth.tex = pixels(tex); earth.cloud = pixels(cloud);
     // Per pixel of the disk: longitude offset, texture row, sunlight, and how close to the edge it is
     const tilt = .41, ct = Math.cos(tilt), st = Math.sin(tilt); // Earth's axis leans about 23°
     const L = [-.68, -.42, .6], idx = [], lon = [], row = [], sun = [], rim = [];
@@ -47,24 +44,24 @@
       const nz = Math.sqrt(1 - q), ax = nx * ct + ny * st, ay = -nx * st + ny * ct;
       idx.push((y * S + x) * 4);
       lon.push(Math.atan2(ax, nz) / (2 * Math.PI));
-      row.push(Math.min(c.height - 1, Math.floor((Math.asin(ay) / Math.PI + .5) * c.height)));
+      row.push(Math.min(tex.height - 1, Math.floor((Math.asin(ay) / Math.PI + .5) * tex.height)));
       const l = nx * L[0] + ny * L[1] + nz * L[2];
       sun.push(.04 + 1.05 * clamp(l * 1.6 + .08)); // soft edge between day and night
       rim.push(Math.pow(1 - nz, 2.2) * .7);
     }
     Object.assign(earth, { idx, lon: Float32Array.from(lon), row: Int32Array.from(row), sun: Float32Array.from(sun), rim: Float32Array.from(rim), ready: true });
   };
-  tex.src = 'assets/img/earth.jpg';
 
   function drawEarth(turn) {
-    const { tex: { data: T, width: TW }, idx, lon, row, sun, rim } = earth, D = out.data;
+    const { tex: { data: T, width: TW, height: TH }, cloud: { data: C, width: CW, height: CH }, idx, lon, row, sun, rim } = earth, D = out.data;
     for (let i = 0; i < idx.length; i++) {
       let u = lon[i] + turn / (2 * Math.PI) + .5;
       u -= Math.floor(u);
       const s = (row[i] * TW + Math.floor(u * TW)) * 4, o = idx[i], k = sun[i], a = rim[i];
-      D[o] = T[s] * k * (1 - a) + 110 * a * Math.min(1, k + .15);
-      D[o + 1] = T[s + 1] * k * (1 - a) + 170 * a * Math.min(1, k + .15);
-      D[o + 2] = T[s + 2] * k * (1 - a) + 255 * a * Math.min(1, k + .15);
+      const cl = C[(Math.floor(row[i] * CH / TH) * CW + Math.floor(u * CW)) * 4] / 255 * .7, w = 240 * (k * .9 + .1) * cl;
+      D[o] = (T[s] * k * (1 - cl) + w) * (1 - a) + 110 * a * Math.min(1, k + .15);
+      D[o + 1] = (T[s + 1] * k * (1 - cl) + w) * (1 - a) + 170 * a * Math.min(1, k + .15);
+      D[o + 2] = (T[s + 2] * k * (1 - cl) + w * 1.04) * (1 - a) + 255 * a * Math.min(1, k + .15);
       D[o + 3] = 255;
     }
     ectx.putImageData(out, 0, 0);
@@ -105,6 +102,7 @@
     halo.addColorStop(1, 'rgba(90,150,255,0)');
     ctx.fillStyle = halo;
     ctx.beginPath(); ctx.arc(cx, cy, r * 1.18, 0, 6.29); ctx.fill();
+    if (!earth.ready && typeof heroGlobe !== 'undefined' && heroGlobe.surface) setup(heroGlobe.surface);
     if (earth.ready) {
       drawEarth(.95 - t * .12); // the globe turns slowly (Europe, Africa and Asia face us)
       ctx.drawImage(earth.cv, cx - r, cy - r, r * 2, r * 2);

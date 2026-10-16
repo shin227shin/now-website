@@ -298,19 +298,26 @@ void main(){
 
   fit();
   addEventListener('resize', fit);
-  if (setupGL()) {
-    fetch('assets/data/land-50m.json').then(r => r.json()).then(topo => {
-      // Paint after the first frames are out, so the opening intro stays smooth
-      (window.requestIdleCallback || setTimeout)(() => { draw.ready(paint(topo)); stage.classList.add('ready'); });
-    }).catch(() => stage.classList.add('ready'));
-  } else stage.classList.add('flat'); // no WebGL: a plain shaded ball (style.css) with the pins still on it
-  requestAnimationFrame(frame);
-
-  return {
+  const hasGL = setupGL();
+  if (!hasGL) stage.classList.add('flat'); // no WebGL: a plain shaded ball (style.css) with the pins still on it
+  const api = {
+    surface: null, // the painted surface; the opening intro (intro.js) wraps the same one on its Earth
     // Re-read the pins after render.js has drawn them
     update() {
       pins = [...svg.querySelectorAll('.pin-pos')].map(el => ({ el, lat: +el.dataset.lat, lon: +el.dataset.lon, shown: true }));
       placePins();
     }
   };
+  fetch('assets/data/land-50m.json').then(r => r.json()).then(topo => {
+    // While the opening intro runs, paint straight away so its Earth gets the surface early (the stars still drift slowly then);
+    // otherwise wait until the first frames are out
+    const intro = document.documentElement.classList.contains('intro');
+    (intro ? f => f() : window.requestIdleCallback || setTimeout)(() => {
+      api.surface = paint(topo);
+      if (hasGL) draw.ready(api.surface);
+      stage.classList.add('ready');
+    });
+  }).catch(() => stage.classList.add('ready'));
+  requestAnimationFrame(frame);
+  return api;
 })();
