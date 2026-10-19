@@ -8,6 +8,7 @@
 | Part | File |
 |---|---|
 | Public page | `index.html`, `assets/style.css`, `assets/render.js`, `assets/countries.js` |
+| Hero globe and opening intro | `assets/globe.js`, `assets/intro.js`, `assets/earth.js`; the Earth pictures in `assets/img/earth/` are made with `tools/globe-texture.html` |
 | Admin page | `admin/index.html`, `assets/admin.js`, `assets/admin.css` |
 | Default content (used until the first save) | `data/default-content.json` |
 | Login (password → token valid for 12 hours) | `netlify/functions/login.mjs` |

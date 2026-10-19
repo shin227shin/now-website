@@ -19,6 +19,10 @@
 <meta name="twitter:image" content="https://claude-code-on-earth.netlify.app/assets/img/og.jpg">
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<!-- The Earth's surface for the intro and the hero globe (assets/earth.js): start loading it first -->
+<link rel="preload" href="assets/img/earth/surface-2048.webp" as="image">
+<link rel="preload" href="assets/img/earth/land.webp" as="image">
+<link rel="preload" href="assets/img/earth/clouds.webp" as="image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,500;1,500;1,600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
@@ -31,6 +35,7 @@ if (!new URLSearchParams(location.search).has('preview') && !location.hash && !m
 </head>
 <body>
 <div class="intro-ov" id="intro" aria-hidden="true"><canvas></canvas><span class="skip">Tap to skip</span></div>
+<script src="assets/earth.js"></script>
 <script src="assets/intro.js"></script>
 <nav class="nav" id="nav">
   <a class="logo" href="#top">CLAUDE CODE <em>on Earth</em></a>
@@ -105,7 +110,8 @@ if (new URLSearchParams(location.search).has('preview')) {
     .then(c => c || Promise.reject(new Error('nothing saved yet')))
     .catch(() => load('data/default-content.json'))
     .then(c => renderPage(c))
-    .catch(e => { document.body.insertAdjacentHTML('afterbegin', '<p style="padding:80px 20px;color:#D97757">Could not load content: ' + e.message + '</p>'); });
+    .catch(e => { document.body.insertAdjacentHTML('afterbegin', '<p style="padding:80px 20px;color:#D97757">Could not load content: ' + e.message + '</p>'); })
+    .finally(() => dispatchEvent(new Event('page-rendered'))); // the intro waits for this, so the page is not laid out mid-flight
 }
 
 // Nav turns solid once the hero is scrolled past (like tesla.com)
