@@ -50,3 +50,4 @@ Locally the content is saved in a local copy of Netlify Blobs, not the live site
 ## Text markup
 
 In text fields: `**bold**`, `*coral text*`, and a new line (Enter) becomes a line break.
+In the points of a region's note (Next Up → Region tabs), a line starting with `- ` becomes a bullet point.

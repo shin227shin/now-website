@@ -101,6 +101,13 @@ async function start() {
   $('app').hidden = false;
   const c = await loadContent();
   setContent(c, true);
+  // Content saved before region notes could be edited here has none; take them from the default (shows as unsaved)
+  if ((c.regions || []).some(r => !r.note)) {
+    const d = await fetch(DEFAULT_URL, { cache: 'no-store' }).then(r => r.json()).catch(() => null);
+    const add = (c.regions || []).filter(r => !r.note && d?.regions?.find(x => x.id === r.id)?.note);
+    add.forEach(r => { r.note = clone(d.regions.find(x => x.id === r.id).note); });
+    if (add.length) { renderEditor(); changed(); toast('Added the region notes from the default. Press “Save & publish” to keep them.'); }
+  }
   status();
 }
 
@@ -305,12 +312,19 @@ function scheduleSection() {
   }).join('');
   const regionItems = regions.map((r, i) => {
     const p = `regions.${i}`;
+    const points = (r.note?.items || []).map((s, j) => `<div class="item">${itemHead(`Point ${String(j + 1).padStart(2, '0')}`, `${p}.note.items`, j)}
+        <textarea rows="4" ${attr(`${p}.note.items.${j}`, 'text')}>${esc(s)}</textarea></div>`).join('');
     return `<div class="item">${itemHead(r.label, 'regions', i)}
       <div class="row">${text('Tab name', `${p}.label`)}${text('Link name', `${p}.id`, { hint: 'Sessions pick their tab by this name. Use <code>americas</code> for the Americas tab.' })}</div>
       ${text('Region name in the hero (optional)', `${p}.heroLabel`, { ph: r.label || '', hint: 'Shown under “Next: …” at the top of the page.' })}
       <div class="sub-h">Time zones on this tab</div>
       ${zoneRows(`${p}.timeZones`)}
       <div class="hint">Leave empty to use the time zones above.</div>
+      <div class="sub-h">Note under Next Up (optional)</div>
+      ${text('Heading', `${p}.note.title`, { ph: 'e.g. Until the Americas sessions start' })}
+      ${points}
+      <button type="button" class="add" data-act="add" data-list="${p}.note.items">+ Add point</button>
+      <div class="hint">A highlighted panel under the tickets, on this tab only. Each point gets a number (01, 02 …). Start a line with <code>- </code> for a bullet point. ${MARKUP_HINT} Remove every point to hide the panel.</div>
     </div>`;
   }).join('');
   return section('schedule', 'next', 'Next Up (sessions &amp; times)', `
@@ -393,7 +407,8 @@ const NEW = {
   activities: () => ({ id: 'activity-' + Date.now(), icon: 'terminal', title: 'New activity', sub: '', body: '' }),
   schedule: () => ({ id: 'session-' + Date.now(), label: 'NEW SESSION', date: new Date(Date.now() + 9 * 3600000 + 7 * 86400000).toISOString().slice(0, 10), startJST: '20:00', durationMin: 45, repeatEveryDays: null }),
   timeZones: () => ({ tz: 'Europe/London', label: 'auto' }),
-  regions: () => ({ id: 'region-' + Date.now(), label: 'New region' })
+  regions: () => ({ id: 'region-' + Date.now(), label: 'New region' }),
+  items: () => '' // a point of a region's note
 };
 
 $('editor').addEventListener('input', e => {
@@ -470,7 +485,7 @@ $('editor').addEventListener('click', e => {
   }
   renderEditor();
   changed();
-  if (act === 'add') document.querySelector(`[data-path^="${list}.${arr.length - 1}."]`)?.focus();
+  if (act === 'add') document.querySelector(`[data-path^="${list}.${arr.length - 1}."], [data-path="${list}.${arr.length - 1}"]`)?.focus();
 });
 
 // Scroll the preview to the part being edited
