@@ -128,6 +128,31 @@
     }
   ],
   "nextUpTitle": "Next Up",
+  "regions": [
+    {
+      "id": "aeo",
+      "label": "Asia · Europe · Oceania"
+    },
+    {
+      "id": "americas",
+      "label": "Americas",
+      "heroLabel": "Americas + Asia·Oceania or Europe",
+      "timeZones": [
+        {
+          "tz": "America/New_York",
+          "label": "auto"
+        },
+        {
+          "tz": "America/Los_Angeles",
+          "label": "auto"
+        },
+        {
+          "tz": "America/Sao_Paulo",
+          "label": "BRT"
+        }
+      ]
+    }
+  ],
   "timeZones": [
     {
       "tz": "Asia/Tokyo",
@@ -145,6 +170,7 @@
   "schedule": [
     {
       "id": "learn-build",
+      "region": "aeo",
       "label": "LEARN & BUILD SESSIONS",
       "date": "2026-10-11",
       "startJST": "20:00",
@@ -152,10 +178,35 @@
       "repeatEveryDays": 14
     },
     {
+      "id": "learn-build-americas",
+      "activity": "learn-build",
+      "region": "americas",
+      "label": "LEARN & BUILD SESSIONS",
+      "cardSub": "45 MIN · DAY & TIME TBD",
+      "tbdText": "Same session, at a different time/date.\nFor members in the Americas, plus Asia & Oceania or Europe (to be decided).\nDay and time will be set after new members from the Americas join us.",
+      "date": null,
+      "startJST": null,
+      "durationMin": 45,
+      "repeatEveryDays": 14
+    },
+    {
       "id": "build-hour",
+      "region": "aeo",
       "label": "BUILD HOUR",
-      "date": "2026-10-16",
-      "startJST": "22:00",
+      "date": "2026-11-04",
+      "startJST": "19:00",
+      "durationMin": 40,
+      "repeatEveryDays": null
+    },
+    {
+      "id": "build-hour-americas",
+      "activity": "build-hour",
+      "region": "americas",
+      "label": "BUILD HOUR",
+      "cardSub": "40 MIN · DAY & TIME TBD",
+      "tbdText": "Same session, at a different time/date.\nFor members in the Americas, plus Asia & Oceania or Europe (to be decided).\nDay and time will be set after new members from the Americas join us.",
+      "date": null,
+      "startJST": null,
       "durationMin": 40,
       "repeatEveryDays": null
     }

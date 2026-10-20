@@ -95,6 +95,7 @@ body{counter-reset:sec}
 .stat span{display:block;margin-top:6px;font-size:14px;font-weight:500;color:#aab3d1}
 .stat.is-next b{color:var(--coral)}
 .stat.tbd{opacity:.6}
+.stat span.rg{margin-top:4px;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#8d99c4}
 
 /* ---------- Opening intro: somewhere in space → close in on Earth → flash → world map with pins lighting up ---------- */
 .intro-ov{display:none}
@@ -125,6 +126,25 @@ html.intro.landed .pin-g{animation:pin-on .7s cubic-bezier(.2,.9,.3,1.4) both;an
 .quote>div{transition:opacity .5s}
 .quote q{quotes:none;display:block;max-width:880px;font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:46px;line-height:1.2;color:var(--ink)}
 .quote small{display:block;margin-top:28px;font-size:13px;letter-spacing:.2em;font-weight:600;color:var(--gold)}
+
+/* ---------- Region tabs (above the cards and Next Up) ---------- */
+.region-tabs{display:inline-flex;gap:4px;margin-top:40px;padding:4px;border-radius:99px;background:#fff;border:1px solid #e3e4e8}
+.region-tabs button{font:inherit;font-size:14px;font-weight:600;letter-spacing:.02em;padding:10px 22px;border:0;border-radius:99px;background:transparent;color:var(--muted);cursor:pointer;transition:background .25s,color .25s}
+.region-tabs button:hover{color:var(--ink)}
+.region-tabs button[aria-selected="true"]{background:var(--coral-d);color:#fff}
+.next .region-tabs{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.14)}
+.next .region-tabs button{color:#aab3d1}
+.next .region-tabs button:hover{color:#fff}
+.next .region-tabs button[aria-selected="true"]{background:var(--coral-d);color:#fff}
+.region-tabs+.grid,.region-tabs+.ticket{margin-top:32px}
+.times.tbd span:nth-child(odd){color:var(--muted)}
+.times.tbd span:nth-child(even){color:var(--muted)}
+.tbd-list{list-style:none;margin:0;padding:0;font-size:14px;line-height:1.55;color:var(--muted)}
+.tbd-list li{position:relative;padding-left:16px}
+.tbd-list li+li{margin-top:6px}
+.tbd-list li:before{content:"•";position:absolute;left:0;color:var(--coral-d)}
+.next .tbd-list{font-size:15px;color:#d4daf0}
+.next .tbd-list li:before{color:var(--coral)}
 
 /* ---------- Activities ---------- */
 /* Top row: the first two tiles side by side; second row: the next three, all the same size. "Coming soon" runs full width */
@@ -222,6 +242,7 @@ footer{padding:36px 32px 44px;border-top:1px solid #e3e4e8;text-align:center;fon
   .chips{grid-template-columns:1fr 1fr;column-gap:24px}.chip{font-size:15px;padding:16px 0}
   .quote{margin-top:72px;padding-left:0;padding-top:64px}.quote:before{font-size:150px;top:-16px}.quote q{font-size:28px}
   .grid{grid-template-columns:1fr;margin-top:40px}
+  .region-tabs{display:flex;margin-top:28px}.region-tabs button{flex:1;padding:10px 12px;font-size:13px}
   .card.soon{flex-direction:column;align-items:flex-start;gap:16px}.card.soon .sub{margin:0;white-space:normal}.card.soon:after{display:none}
   .card,.ticket>div{padding:28px}.card:after{top:28px;right:28px}
   .need li{font-size:17px;padding:20px 0 20px 48px}.need li:before{top:24px}
