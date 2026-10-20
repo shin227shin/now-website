@@ -232,6 +232,24 @@ function renderRegion(c, root = document) {
     : '<div class="stat is-next"><b>TBD</b><span>Next session</span></div>');
   $('cards').innerHTML = c.activities.map(a => renderCard(a, c)).join('');
   $('ticket').innerHTML = renderSchedule(c);
+  renderNote(c, root);
+}
+
+// A region's "until then" note under Next Up (e.g. what Americas members can do before their own sessions start)
+function renderNote(c, root = document) {
+  root.querySelectorAll('.region-note').forEach(el => el.remove());
+  const n = regionNow(c)?.note;
+  if (!n?.items?.length) return;
+  // Lines starting with "- " become a bullet list; other lines are plain text
+  const text = s => String(s).split('\n').reduce((out, line) => {
+    const b = line.match(/^\s*-\s+(.*)/);
+    if (!b) return out + `<p>${md(line)}</p>`;
+    const li = `<li>${md(b[1])}</li>`;
+    return out.endsWith('</ul>') ? out.slice(0, -5) + li + '</ul>' : out + `<ul>${li}</ul>`;
+  }, '');
+  const list = `<ol>${n.items.map((s, i) => `<li><s>${String(i + 1).padStart(2, '0')}</s>${text(s)}</li>`).join('')}</ol>`;
+  root.querySelector('#ticket').insertAdjacentHTML('afterend',
+    `<div class="region-note"><div class="eyebrow">${esc(n.title)}</div>${list}</div>`);
 }
 
 function renderPage(c, root = document) {

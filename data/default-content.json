@@ -4,7 +4,7 @@
     "year": "2026",
     "titleLine1": "Claude Code",
     "titleLine2": "on Earth",
-    "tagline": "Built around one valuable skill: Claude Code.\nAsia, Europe and Oceania today, **everywhere on Earth in the future.**",
+    "tagline": "Built around one valuable skill: Claude Code.\nAsia, Europe, Oceania — and now the Americas, with our first member from Argentina! Come join us and help grow the Americas side.🔥",
     "introTitle": "A casual cross-border community"
   },
   "stats": {
@@ -54,7 +54,7 @@
     },
     {
       "name": "Poland",
-      "count": 3
+      "count": 2
     },
     {
       "name": "Netherlands",
@@ -66,6 +66,10 @@
     },
     {
       "name": "Singapore",
+      "count": 1
+    },
+    {
+      "name": "Argentina",
       "count": 1
     }
   ],
@@ -137,6 +141,14 @@
       "id": "americas",
       "label": "Americas",
       "heroLabel": "Americas + Asia·Oceania or Europe",
+      "note": {
+        "title": "Until the Americas sessions start",
+        "items": [
+          "Join the **Asia · Europe · Oceania** sessions if the time works:\n- **Learn & Build Sessions** → every other Sunday, 11:00 UTC\n- **Build Hour** → weekdays (time varies)",
+          "These work at any time:\n- **Tips Exchange** → get paired with a member\n- *#03_Ask for help* → ask anything",
+          "Tell us the days and times that suit you, so we can set up the **Americas sessions** as soon as possible."
+        ]
+      },
       "timeZones": [
         {
           "tz": "America/New_York",
@@ -182,8 +194,8 @@
       "activity": "learn-build",
       "region": "americas",
       "label": "LEARN & BUILD SESSIONS",
-      "cardSub": "45 MIN · DAY & TIME TBD",
-      "tbdText": "Same session, at a different time/date.\nFor members in the Americas, plus Asia & Oceania or Europe (to be decided).\nDay and time will be set after new members from the Americas join us.",
+      "cardSub": "45 MIN · EVERY OTHER WEEK",
+      "tbdText": "Same session, at a different time/date.\nFor members in the Americas, plus Asia & Oceania or Europe (to be decided).\nDay and time will be set after a number of new members from the Americas join us.",
       "date": null,
       "startJST": null,
       "durationMin": 45,
@@ -203,8 +215,8 @@
       "activity": "build-hour",
       "region": "americas",
       "label": "BUILD HOUR",
-      "cardSub": "40 MIN · DAY & TIME TBD",
-      "tbdText": "Same session, at a different time/date.\nFor members in the Americas, plus Asia & Oceania or Europe (to be decided).\nDay and time will be set after new members from the Americas join us.",
+      "cardSub": "40 MIN · ON AN IRREGULAR BASIS・WEEKDAYS",
+      "tbdText": "Same session, at a different time/date.\nFor members in the Americas, plus Asia & Oceania or Europe (to be decided).\nDay and time will be set after a number of new members from the Americas join us.",
       "date": null,
       "startJST": null,
       "durationMin": 40,

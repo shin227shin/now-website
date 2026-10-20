@@ -110,6 +110,11 @@ if (new URLSearchParams(location.search).has('preview')) {
   const load = url => fetch(url, { cache: 'no-store' }).then(r => r.ok ? r.json() : Promise.reject(new Error(r.status)));
   load('/api/content')
     .then(c => c || Promise.reject(new Error('nothing saved yet')))
+    // Region notes are not edited in the admin page yet, so saved content takes them from the bundled default
+    .then(c => load('data/default-content.json').then(d => {
+      (c.regions || []).forEach(r => { r.note ??= d.regions?.find(x => x.id === r.id)?.note; });
+      return c;
+    }, () => c))
     .catch(() => load('data/default-content.json'))
     .then(c => renderPage(c))
     .catch(e => { document.body.insertAdjacentHTML('afterbegin', '<p style="padding:80px 20px;color:#D97757">Could not load content: ' + e.message + '</p>'); })

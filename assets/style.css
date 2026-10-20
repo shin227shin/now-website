@@ -250,3 +250,28 @@ footer{padding:36px 32px 44px;border-top:1px solid #e3e4e8;text-align:center;fon
   .ticket .d{font-size:34px}
   .contact{gap:18px}.contact img{width:72px;height:72px}
 }
+
+/* ---------- Region note: "Until the Americas sessions start", one wide coral-edged panel under Next Up ---------- */
+.region-note{margin-top:24px;padding:36px 40px 40px;border-radius:16px;border:1px solid var(--coral);background:linear-gradient(135deg,rgba(255,154,118,.14),rgba(255,154,118,.04));box-shadow:0 0 0 4px rgba(255,154,118,.08),0 20px 60px rgba(217,119,87,.18)}
+.region-note .eyebrow{color:var(--coral);padding-bottom:22px;margin-bottom:26px;border-bottom:1px solid rgba(255,154,118,.3)}
+.region-note ol{list-style:none;display:grid;grid-template-columns:repeat(3,1fr)}
+.region-note ol>li{padding:2px 40px 0}
+.region-note ol>li:first-child{padding-left:0}.region-note ol>li:last-child{padding-right:0}
+.region-note ol>li+li{border-left:1px solid rgba(255,255,255,.12)}
+.region-note ol>li>s{display:block;text-decoration:none;font-size:13px;font-weight:600;letter-spacing:.12em;color:var(--coral);font-variant-numeric:tabular-nums}
+.region-note p{margin-top:12px;font-size:16px;line-height:1.65;color:#e6eaf7}
+.region-note b{color:#fff}
+.region-note .hl{color:var(--coral)}
+/* "- " lines in the note text */
+.region-note ul{list-style:none;margin-top:10px;font-size:16px;line-height:1.55;color:#e6eaf7}
+.region-note ul li{position:relative;padding-left:16px}
+.region-note ul li+li{margin-top:6px}
+.region-note ul li:before{content:"•";position:absolute;left:0;color:var(--coral)}
+@media (max-width:900px){
+  .region-note ol{grid-template-columns:1fr}
+  .region-note ol>li,.region-note ol>li+li{padding:0;border-left:0}
+  .region-note ol>li+li{margin-top:20px;padding-top:20px;border-top:1px solid rgba(255,255,255,.12)}
+}
+@media (max-width:640px){
+  .region-note{padding:26px 24px 28px}
+}
