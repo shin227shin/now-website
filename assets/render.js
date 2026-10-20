@@ -91,7 +91,7 @@ function pickRegion(c) {
 }
 const regionNow = c => (c.regions || []).find(r => r.id === region);
 const inRegion = item => !item.region || !region || item.region === region;
-const zonesFor = c => regionNow(c)?.timeZones || c.timeZones;
+const zonesFor = c => regionNow(c)?.timeZones?.length ? regionNow(c).timeZones : c.timeZones; // a region with no zones of its own uses the main ones
 
 function renderTabs(c, root) {
   const tabs = root.querySelectorAll('.region-tabs');
@@ -195,9 +195,10 @@ function renderCard(a, c) {
   return `<div class="card${soon ? ' soon' : ''}">${icon}<h3>${esc(a.title)}</h3>${sub ? `<div class="sub">${esc(sub)}</div>` : ''}${body}${times}${meet}</div>`;
 }
 
-function dayLabel(start) {
-  const jst = new Date(start.getTime() + 9 * 3600000);
-  return `${ordinal(jst.getUTCDate())} ${jst.toLocaleString('en-GB', { month: 'long', timeZone: 'UTC' })}`;
+// "8th November" on the calendar of the given zone (Japan by default; a region tab uses its first time zone)
+function dayLabel(start, tz = 'Asia/Tokyo') {
+  const p = new Intl.DateTimeFormat('en-GB', { timeZone: tz, day: 'numeric', month: 'long' }).formatToParts(start);
+  return `${ordinal(Number(p.find(x => x.type === 'day').value))} ${p.find(x => x.type === 'month').value}`;
 }
 
 function renderSchedule(c, now = new Date()) {
@@ -206,7 +207,7 @@ function renderSchedule(c, now = new Date()) {
     if (!start) {
       return `<div class="tbd"><div class="k">${esc(item.label)}</div><div class="d">Date TBD</div><div class="t"><span></span>${tbdNote(item)}</div></div>`;
     }
-    return `<div><div class="k">${esc(item.label)}</div><div class="d">${dayLabel(start)}</div><div class="t">${timeRows(c, start, item.durationMin)}</div></div>`;
+    return `<div><div class="k">${esc(item.label)}</div><div class="d">${dayLabel(start, zonesFor(c)[0]?.tz)}</div><div class="t">${timeRows(c, start, item.durationMin)}</div></div>`;
   }).join('');
 }
 
@@ -227,7 +228,7 @@ function renderRegion(c, root = document) {
   // Say which region the dates are for, since the hero has no tabs of its own
   const rg = x => { const r = x.item.region && (c.regions || []).find(r => r.id === x.item.region); return r ? `<span class="rg">${esc(r.heroLabel || r.label)}</span>` : ''; };
   stats.insertAdjacentHTML('beforeend', next.length
-    ? next.map(x => `<div class="stat is-next${x.start ? '' : ' tbd'}"><b>${x.start ? dayLabel(x.start).replace(/ (\w{3})\w*$/, ' $1') : 'Date TBD'}</b><span>Next: ${esc(titleCase(x.item.label))}</span>${rg(x)}</div>`).join('')
+    ? next.map(x => `<div class="stat is-next${x.start ? '' : ' tbd'}"><b>${x.start ? dayLabel(x.start, zonesFor(c)[0]?.tz).replace(/ (\w{3})\w*$/, ' $1') : 'Date TBD'}</b><span>Next: ${esc(titleCase(x.item.label))}</span>${rg(x)}</div>`).join('')
     : '<div class="stat is-next"><b>TBD</b><span>Next session</span></div>');
   $('cards').innerHTML = c.activities.map(a => renderCard(a, c)).join('');
   $('ticket').innerHTML = renderSchedule(c);

@@ -106,9 +106,11 @@ async function start() {
 
 function problems() {
   const out = [];
-  state.timeZones.forEach(z => { if (!validZone(z.tz)) out.push(`Time zone "${z.tz}" is not valid.`); });
+  [state.timeZones, ...(state.regions || []).map(r => r.timeZones || [])].flat()
+    .forEach(z => { if (!validZone(z.tz)) out.push(`Time zone "${z.tz}" is not valid.`); });
   state.countries.forEach(x => { if (!x.name?.trim()) out.push('A country has no name.'); });
-  state.schedule.forEach(s => { if (!s.date || !s.startJST) out.push(`"${s.label}" needs a date and a start time.`); });
+  // No date and no time = "Date TBD"; only one of the two is a mistake
+  state.schedule.forEach(s => { if (!s.date !== !s.startJST) out.push(`"${s.label}" needs both a date and a start time (or neither, for “Date TBD”).`); });
   return out;
 }
 async function save() {
@@ -138,6 +140,7 @@ function status() {
 function previewContent() {
   const c = content();
   c.timeZones = c.timeZones.filter(z => validZone(z.tz));
+  (c.regions || []).forEach(r => { if (r.timeZones) r.timeZones = r.timeZones.filter(z => validZone(z.tz)); });
   return c;
 }
 function sendPreview() {
@@ -271,29 +274,56 @@ function activitiesSection() {
     <button type="button" class="add" data-act="add" data-list="activities">+ Add activity</button>`);
 }
 
+// Time zone rows for the main list ("timeZones") or a region's own list ("regions.1.timeZones")
+function zoneRows(list) {
+  const rows = (getPath(state, list) || []).map((z, i) => `<div class="zone">
+      <input ${attr(`${list}.${i}.tz`, 'text')} value="${esc(z.tz)}" list="zone-names" placeholder="e.g. Europe/Berlin">
+      <input ${attr(`${list}.${i}.label`, 'text')} value="${esc(z.label ?? '')}" placeholder="auto">
+      ${btn('up', list, i, '↑', 'icon', 'Move up')}${btn('down', list, i, '↓', 'icon', 'Move down')}${btn('remove', list, i, '✕', 'icon danger', 'Remove')}
+      <span class="warn" data-live="zone-${list}-${i}"></span></div>`).join('');
+  return `<div><div class="zone zone-h"><span>Time zone</span><span>Label</span></div>${rows}</div>
+    <button type="button" class="add" data-act="add" data-list="${list}">+ Add time zone</button>`;
+}
+
 function scheduleSection() {
+  const regions = state.regions || [];
   const items = state.schedule.map((s, i) => {
     const p = `schedule.${i}`;
+    const regionRow = regions.length ? `<div class="row">
+        ${select('Region tab', `${p}.region`, [['', 'All regions'], ...regions.map(r => [r.id, r.label])], { hint: 'Shown only on this tab of Activities and Next Up.' })}
+        ${s.region ? select('Activity card', `${p}.activity`, [['', 'None'], ...state.activities.map(a => [a.id, a.title])], { hint: 'On this tab, the card shows these times (or the note below).' }) : ''}</div>` : '';
     return `<div class="item">${itemHead(s.label, 'schedule', i)}
       <div class="row">${text('Name on the ticket', `${p}.label`)}${text('Link name', `${p}.id`, { hint: 'Used to show these times on an activity card.' })}</div>
+      ${regionRow}
       <div class="row3">${text('Date (Japan)', `${p}.date`, { type: 'date' })}${text('Start time (JST)', `${p}.startJST`, { type: 'time' })}${num('Length (minutes)', `${p}.durationMin`, { min: 5 })}</div>
+      <div class="hint">Not decided yet? Leave the date and the start time empty. The page shows “Date TBD” with the note below.</div>
       ${num('Repeat every … days', `${p}.repeatEveryDays`, { nullable: true, ph: 'no repeat', hint: '14 = every other week. Leave empty for a one-time session. Repeating sessions move to the next date by themselves.' })}
+      ${s.region ? text('Small line on the card (optional)', `${p}.cardSub`, { ph: 'the card’s own line', hint: 'On this tab, replaces the small line under the card title, e.g. 45 MIN · DAY &amp; TIME TBD.' }) : ''}
+      ${area('Note while the date is TBD', `${p}.tbdText`, { rows: 3, ph: 'Next date coming soon.', hint: 'One line = one bullet point. ' + MARKUP_HINT.split('.')[0] + '.' })}
       <div class="conv" data-live="conv-${i}"></div>
     </div>`;
   }).join('');
-  const zones = state.timeZones.map((z, i) => `<div class="zone">
-      <input ${attr(`timeZones.${i}.tz`, 'text')} value="${esc(z.tz)}" list="zone-names" placeholder="e.g. Europe/Berlin">
-      <input ${attr(`timeZones.${i}.label`, 'text')} value="${esc(z.label ?? '')}" placeholder="auto">
-      ${btn('up', 'timeZones', i, '↑', 'icon', 'Move up')}${btn('down', 'timeZones', i, '↓', 'icon', 'Move down')}${btn('remove', 'timeZones', i, '✕', 'icon danger', 'Remove')}
-      <span class="warn" data-live="zone-${i}"></span></div>`).join('');
+  const regionItems = regions.map((r, i) => {
+    const p = `regions.${i}`;
+    return `<div class="item">${itemHead(r.label, 'regions', i)}
+      <div class="row">${text('Tab name', `${p}.label`)}${text('Link name', `${p}.id`, { hint: 'Sessions pick their tab by this name. Use <code>americas</code> for the Americas tab.' })}</div>
+      ${text('Region name in the hero (optional)', `${p}.heroLabel`, { ph: r.label || '', hint: 'Shown under “Next: …” at the top of the page.' })}
+      <div class="sub-h">Time zones on this tab</div>
+      ${zoneRows(`${p}.timeZones`)}
+      <div class="hint">Leave empty to use the time zones above.</div>
+    </div>`;
+  }).join('');
   return section('schedule', 'next', 'Next Up (sessions &amp; times)', `
     ${text('Section heading', 'nextUpTitle')}
     ${items}
     <button type="button" class="add" data-act="add" data-list="schedule">+ Add session</button>
     <div class="sub-h">Time zones shown</div>
-    <div><div class="zone zone-h"><span>Time zone</span><span>Label</span></div>${zones}
-    <div class="hint">Label <code>auto</code> picks CET / CEST (or GMT / BST) by the date.</div></div>
-    <button type="button" class="add" data-act="add" data-list="timeZones">+ Add time zone</button>
+    ${zoneRows('timeZones')}
+    <div class="hint">Label <code>auto</code> picks CET / CEST (or GMT / BST, EDT / EST …) by the date.</div>
+    <div class="sub-h">Region tabs</div>
+    ${regionItems}
+    <button type="button" class="add" data-act="add" data-list="regions">+ Add region</button>
+    <div class="hint">With two or more regions, a switch shows above the cards and Next Up. The first tab is picked from the visitor’s time zone: the Americas go to the <code>americas</code> tab, everyone else to the first tab.</div>
     <datalist id="zone-names">${ZONES.map(z => `<option value="${z}">`).join('')}</datalist>`);
 }
 
@@ -324,6 +354,7 @@ function renderEditor() {
   closed.forEach(id => $(id)?.removeAttribute('open'));
   ed.scrollTop = top;
   $('photo-file').addEventListener('change', uploadPhoto);
+  renderLive(); // fill the converted times and warnings of the new form right away
 }
 
 // Parts that change while typing (totals, converted times, warnings)
@@ -335,20 +366,24 @@ function renderLive() {
   const note = live('countries-note');
   if (note) note.textContent = `${t.members} members · ${t.countries} countries`;
 
-  const zones = state.timeZones.filter(z => validZone(z.tz));
   state.schedule.forEach((s, i) => {
     const el = live('conv-' + i);
     if (!el) return;
     const start = nextStart(s);
-    if (!s.date || !s.startJST) { el.textContent = 'Set a date and a start time.'; return; }
+    // A region session uses that region's own time zones, when it has some
+    const own = state.regions?.find(r => r.id === s.region)?.timeZones;
+    const zones = (own?.length ? own : state.timeZones).filter(z => validZone(z.tz));
+    if (!s.date && !s.startJST) { el.innerHTML = '<b>No date yet.</b> The page shows “Date TBD” with the note above.'; return; }
+    if (!s.date || !s.startJST) { el.textContent = 'Set both a date and a start time, or leave both empty.'; return; }
     if (!start) { el.innerHTML = '<b>This date has passed.</b> The page shows “Date TBD” until you set a new date.'; return; }
     const end = new Date(start.getTime() + (Number(s.durationMin) || 0) * 60000);
-    el.innerHTML = `<b>Next: ${dayLabel(start)}</b> &nbsp;·&nbsp; ` + zones.map(z => `${esc(tzLabel(start, z))} ${hm(start, z.tz)}–${hm(end, z.tz)}`).join(' &nbsp;·&nbsp; ');
+    el.innerHTML = `<b>Next: ${dayLabel(start, zones[0]?.tz)}</b> &nbsp;·&nbsp; ` + zones.map(z => `${esc(tzLabel(start, z))} ${hm(start, z.tz)}–${hm(end, z.tz)}`).join(' &nbsp;·&nbsp; ');
   });
-  state.timeZones.forEach((z, i) => {
-    const el = live('zone-' + i);
-    if (el) el.textContent = validZone(z.tz) ? '' : 'Not a valid time zone (e.g. Europe/Berlin).';
-  });
+  ['timeZones', ...(state.regions || []).map((r, i) => `regions.${i}.timeZones`)].forEach(list =>
+    (getPath(state, list) || []).forEach((z, i) => {
+      const el = live(`zone-${list}-${i}`);
+      if (el) el.textContent = validZone(z.tz) ? '' : 'Not a valid time zone (e.g. Europe/Berlin).';
+    }));
 }
 
 // ---------- Editing ----------
@@ -357,7 +392,8 @@ const NEW = {
   quotes: () => ({ text: '', name: '', country: '' }),
   activities: () => ({ id: 'activity-' + Date.now(), icon: 'terminal', title: 'New activity', sub: '', body: '' }),
   schedule: () => ({ id: 'session-' + Date.now(), label: 'NEW SESSION', date: new Date(Date.now() + 9 * 3600000 + 7 * 86400000).toISOString().slice(0, 10), startJST: '20:00', durationMin: 45, repeatEveryDays: null }),
-  timeZones: () => ({ tz: 'Europe/London', label: 'auto' })
+  timeZones: () => ({ tz: 'Europe/London', label: 'auto' }),
+  regions: () => ({ id: 'region-' + Date.now(), label: 'New region' })
 };
 
 $('editor').addEventListener('input', e => {
@@ -377,11 +413,13 @@ $('editor').addEventListener('input', e => {
     }
     default: if (el.tagName === 'SELECT' && v === '') v = undefined;
   }
+  // Sessions keep their tab when the region's link name is changed
+  if (/^regions\.\d+\.id$/.test(path)) { const old = getPath(state, path); state.schedule.forEach(s => { if (s.region === old) s.region = v; }); }
   setPath(state, path, v);
   changed();
   // Some changes show or hide other fields
   if (el.tagName === 'SELECT' || el.type === 'checkbox') return renderEditor();
-  if (/^(activities\.\d+\.title|schedule\.\d+\.label)$/.test(path)) el.closest('.item').querySelector('.item-h b').textContent = v || 'Untitled';
+  if (/^(activities\.\d+\.title|schedule\.\d+\.label|regions\.\d+\.label)$/.test(path)) el.closest('.item').querySelector('.item-h b').textContent = v || 'Untitled';
   if (/^schedule\.\d+\.(id|label)$/.test(path)) updateTitles();
 });
 // The "Show session times from" menus list the sessions by name
@@ -393,6 +431,8 @@ function updateTitles() {
   });
 }
 $('editor').addEventListener('change', e => {
+  // A region was renamed: re-draw so the "Region tab" menus of the sessions follow
+  if (/^regions\.\d+\.(id|label)$/.test(e.target.dataset.path || '')) return renderEditor();
   // A country name was changed: re-draw only if the map-position row has to appear or go away
   const m = (e.target.dataset.path || '').match(/^countries\.(\d+)\.name$/);
   if (!m) return;
@@ -406,9 +446,12 @@ $('editor').addEventListener('click', e => {
   if (!b) return;
   const { act, list } = b.dataset;
   const i = Number(b.dataset.i);
-  const arr = list && state[list];
+  // "list" is a path, e.g. "schedule" or "regions.1.timeZones"; a list that does not exist yet is made on "add"
+  let arr = list && getPath(state, list);
   switch (act) {
-    case 'add': arr.push(NEW[list]()); break;
+    case 'add':
+      if (!arr) setPath(state, list, arr = []);
+      arr.push(NEW[list.split('.').pop()]()); break;
     case 'remove':
       if (list !== 'countries' && !confirm('Remove this item?')) return;
       arr.splice(i, 1); break;
