@@ -321,7 +321,7 @@ function scheduleSection() {
       ${zoneRows(`${p}.timeZones`)}
       <div class="hint">Leave empty to use the time zones above.</div>
       <div class="sub-h">Note under Next Up (optional)</div>
-      ${text('Heading', `${p}.note.title`, { ph: 'e.g. Until the Americas sessions start' })}
+      ${text('Heading', `${p}.note.title`, { ph: 'e.g. What Americas members can do for now' })}
       ${points}
       <button type="button" class="add" data-act="add" data-list="${p}.note.items">+ Add point</button>
       <div class="hint">A highlighted panel under the tickets, on this tab only. Each point gets a number (01, 02 …). Start a line with <code>- </code> for a bullet point. ${MARKUP_HINT} Remove every point to hide the panel.</div>

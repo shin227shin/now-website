@@ -251,7 +251,19 @@ footer{padding:36px 32px 44px;border-top:1px solid #e3e4e8;text-align:center;fon
   .contact{gap:18px}.contact img{width:72px;height:72px}
 }
 
-/* ---------- Region note: "Until the Americas sessions start", one wide coral-edged panel under Next Up ---------- */
+/* ---------- Hero button that scrolls to the region note, and the footer link ---------- */
+.stats.has-cta{padding-bottom:28px}
+.hero-cta{position:relative;display:flex;justify-content:center;padding:0 16px 64px}
+.hero-cta[hidden]{display:none}
+.btn-ghost{display:inline-flex;align-items:center;gap:10px;padding:12px 26px;border-radius:999px;border:1px solid var(--coral);background:rgba(255,154,118,.1);color:var(--coral);font-size:14px;font-weight:600;transition:background .2s}
+.btn-ghost:hover{background:rgba(255,154,118,.22)}
+.btn-ghost svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.region-note{scroll-margin-top:90px}
+.loc-link{margin-left:14px;padding-left:14px;border-left:1px solid currentColor;color:var(--coral-d);font-weight:600}
+.loc-link:hover{text-decoration:underline}
+html{scroll-behavior:smooth}
+
+/* ---------- Region note: "What Americas members can do for now", one wide coral-edged panel under Next Up ---------- */
 .region-note{margin-top:24px;padding:36px 40px 40px;border-radius:16px;border:1px solid var(--coral);background:linear-gradient(135deg,rgba(255,154,118,.14),rgba(255,154,118,.04));box-shadow:0 0 0 4px rgba(255,154,118,.08),0 20px 60px rgba(217,119,87,.18)}
 .region-note .eyebrow{color:var(--coral);padding-bottom:22px;margin-bottom:26px;border-bottom:1px solid rgba(255,154,118,.3)}
 .region-note ol{list-style:none;display:grid;grid-template-columns:repeat(3,1fr)}

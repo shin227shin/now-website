@@ -239,6 +239,11 @@ function renderRegion(c, root = document) {
 function renderNote(c, root = document) {
   root.querySelectorAll('.region-note').forEach(el => el.remove());
   const n = regionNow(c)?.note;
+  // The hero button that jumps down to this note is only shown while there is a note
+  const cta = root.querySelector('#hero-cta');
+  if (cta) cta.hidden = !n?.items?.length;
+  const st = root.querySelector('#stats');
+  if (st) st.classList.toggle('has-cta', !!n?.items?.length);
   if (!n?.items?.length) return;
   // Lines starting with "- " become a bullet list; other lines are plain text
   const text = s => String(s).split('\n').reduce((out, line) => {
@@ -249,7 +254,7 @@ function renderNote(c, root = document) {
   }, '');
   const list = `<ol>${n.items.map((s, i) => `<li><s>${String(i + 1).padStart(2, '0')}</s>${text(s)}</li>`).join('')}</ol>`;
   root.querySelector('#ticket').insertAdjacentHTML('afterend',
-    `<div class="region-note"><div class="eyebrow">${esc(n.title)}</div>${list}</div>`);
+    `<div class="region-note" id="region-note"><div class="eyebrow">${esc(n.title)}</div>${list}</div>`);
 }
 
 function renderPage(c, root = document) {
@@ -306,7 +311,7 @@ function renderPage(c, root = document) {
   $('contact').innerHTML =
     (p.photo ? `<img src="${esc(p.photo)}" alt="${esc(p.name)}">` : '') +
     `<div><div class="eyebrow">${esc(p.label || 'Contact')}</div><div class="name">${esc(p.name)}</div>` +
-    (p.location ? `<div class="loc"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${esc(p.location)}</div>` : '') +
+    (p.location ? `<div class="loc"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${esc(p.location)}<a class="loc-link" href="https://www.linkedin.com/in/shintaro-yasuda-6738602a9/" target="_blank" rel="noopener">Linkedin</a></div>` : '') +
     (p.link ? `<a class="btn" href="${esc(p.link)}" target="_blank" rel="noopener">Get in touch</a>` : '') + '</div>';
   $('foot').textContent = `${h.titleLine1} ${h.titleLine2} © ${h.year} · ${titleCase(h.label)}`;
 
