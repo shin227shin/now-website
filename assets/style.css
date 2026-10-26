@@ -287,3 +287,13 @@ html{scroll-behavior:smooth}
 @media (max-width:640px){
   .region-note{padding:26px 24px 28px}
 }
+
+/* ---------- Past session slides: thumbnails that open the PDF in a new tab ---------- */
+.past-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px}
+.past-card{display:block;background:#fff;border:1px solid #e8e8e6;border-radius:20px;padding:16px;transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s,border-color .35s}
+.past-card:hover{transform:translateY(-4px);border-color:transparent;box-shadow:0 24px 48px rgba(14,18,38,.10)}
+.past-card img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:12px;border:1px solid #eee}
+.past-card .k{margin:16px 8px 0;font-size:12px;letter-spacing:.18em;font-weight:600;color:var(--coral-d)}
+.past-card .t{margin:6px 8px 8px;font-size:20px;font-weight:600;color:var(--ink);letter-spacing:-.01em}
+@media(max-width:800px){.past-grid{grid-template-columns:1fr}}
+.past{background:#f5f5f3}

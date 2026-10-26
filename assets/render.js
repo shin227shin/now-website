@@ -119,10 +119,7 @@ function renderMap(c) {
   const order = pts.map(o => o.p[1]).sort((a, b) => a - b);
   g.innerHTML = pts.map(({ x, p: [lat, lon] }) => {
     const n = Number(x.count) || 0;
-    const badge = n > 1
-      ? `<circle class="badge" cx="13" cy="-13" r="11" fill="#fff"/><text x="13" y="-8.5" text-anchor="middle" font-family="Inter" font-weight="800" font-size="14" fill="#1a1a2e">${n}</text>`
-      : '';
-    return `<g class="pin-pos" data-lat="${lat}" data-lon="${lon}"><g class="pin-g" style="--i:${order.indexOf(lon)}" tabindex="0" role="button" aria-label="${esc(x.name)}" data-name="${esc(x.name)}" data-count="${n}"><circle r="22" fill="transparent"/><circle class="halo" r="30" fill="url(#pin-glow)"/><circle class="pin" r="11" fill="#D97757" opacity=".28"/><circle class="dot" r="5" fill="#FF9A76" stroke="#fff" stroke-width="1.5"/>${badge}</g></g>`;
+    return `<g class="pin-pos" data-lat="${lat}" data-lon="${lon}"><g class="pin-g" style="--i:${order.indexOf(lon)}" tabindex="0" role="button" aria-label="${esc(x.name)}" data-name="${esc(x.name)}" data-count="${n}"><circle r="22" fill="transparent"/><circle class="halo" r="30" fill="url(#pin-glow)"/><circle class="pin" r="11" fill="#D97757" opacity=".28"/><circle class="dot" r="5" fill="#FF9A76" stroke="#fff" stroke-width="1.5"/></g></g>`;
   }).join('');
   if (typeof heroGlobe !== 'undefined') heroGlobe.update();
   mapTips(g);
@@ -149,9 +146,7 @@ function mapTips(g) {
     const left = Math.min(Math.max(x, half + 8), m.width - half - 8);
     tip.style.left = `${left}px`;
     tip.style.setProperty('--arrow', `${x - left}px`);
-    // Sit above the count badge too, when there is one
-    const badge = pin.querySelector('.badge');
-    tip.style.top = `${Math.min(d.top, badge ? badge.getBoundingClientRect().top : d.top) - m.top}px`;
+    tip.style.top = `${d.top - m.top}px`;
     tip.classList.add('show');
     map.classList.add('hold'); // the globe stops turning while a label is open
   };
