@@ -214,12 +214,15 @@ function renderRegion(c, root = document) {
   // Keep the bubble inside the screen: nudge it sideways by however much it overflows (tablet widths)
   stats.querySelectorAll('.has-tip').forEach(el => {
     const fit = () => {
-      const tip = el.querySelector('.stat-tip'); tip.style.setProperty('--tx', '0px');
+      const tip = el.querySelector('.stat-tip');
+      // Measure with the slide animation off: on phones a tap fires this twice, and mid-slide positions gave a wrong nudge
+      tip.style.transition = 'none'; tip.style.setProperty('--tx', '0px');
       const r = tip.getBoundingClientRect(), vw = document.documentElement.clientWidth;
       const tx = Math.round(Math.max(8 - r.left, Math.min(0, vw - 8 - r.right)));
       const sr = el.getBoundingClientRect();
       tip.style.setProperty('--tx', tx + 'px');
       tip.style.setProperty('--ax', Math.round(sr.left + sr.width / 2 - (r.left + tx)) + 'px'); // arrow stays under the session
+      void tip.offsetWidth; tip.style.transition = '';
     };
     ['mouseenter', 'focus', 'touchstart'].forEach(ev => el.addEventListener(ev, fit, { passive: true }));
   });
