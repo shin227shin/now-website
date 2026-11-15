@@ -4,7 +4,7 @@
     "year": "2026",
     "titleLine1": "Claude Code",
     "titleLine2": "on Earth",
-    "tagline": "Built around one valuable skill: Claude Code.\nAsia, Europe, Oceania — and now the Americas, with our first member from Argentina! Come join us and help grow the Americas side.🔥",
+    "tagline": "Built around one valuable skill: Claude Code.\nAsia, Europe, Oceania — and now the Americas! \nCome join us and help grow the Americas side.🔥",
     "introTitle": "A casual cross-border community"
   },
   "stats": {
@@ -18,7 +18,7 @@
     },
     {
       "name": "Germany",
-      "count": 1
+      "count": 4
     },
     {
       "name": "Greece",
@@ -30,7 +30,7 @@
     },
     {
       "name": "Spain",
-      "count": 1
+      "count": 2
     },
     {
       "name": "Portugal",
@@ -42,11 +42,11 @@
     },
     {
       "name": "Japan",
-      "count": 2
+      "count": 5
     },
     {
       "name": "India",
-      "count": 4
+      "count": 5
     },
     {
       "name": "Philippines",
@@ -62,7 +62,7 @@
     },
     {
       "name": "Australia",
-      "count": 3
+      "count": 4
     },
     {
       "name": "Singapore",
@@ -70,6 +70,26 @@
     },
     {
       "name": "Argentina",
+      "count": 2
+    },
+    {
+      "name": "Chile",
+      "count": 1
+    },
+    {
+      "name": "United States",
+      "count": 6
+    },
+    {
+      "name": "Czech Republic",
+      "count": 1
+    },
+    {
+      "name": "Canada",
+      "count": 2
+    },
+    {
+      "name": "Denmark",
       "count": 1
     }
   ],
@@ -86,16 +106,25 @@
       "id": "learn-build",
       "icon": "terminal",
       "title": "Learn & Build Sessions",
-      "sub": "45 MIN · EVERY OTHER SUNDAY",
-      "body": "First half: presentation & discussion.\nSecond half: hands-on build related to the first half.\nNo need to attend every time.",
+      "sub": "45 MIN · EVERY OTHER WEEK & ON WEEKDAYS",
+      "body": "**Convenient for Oceania · Asia · Europe**\nFirst half: presentation & discussion.\nSecond half: hands-on build related to the first half.\nNo need to attend every time.",
       "meetup": true,
       "timesFrom": "learn-build"
+    },
+    {
+      "id": "learn-build-americas",
+      "icon": "terminal",
+      "title": "Learn & Build Sessions - Americas & Global",
+      "sub": "45 MIN · EVERY OTHER MONDAY",
+      "body": "**Convenient for Asia · Europe · the Americas**\nFirst half: presentation & discussion.\nSecond half: hands-on build related to the first half.\nNo need to attend every time.",
+      "meetup": true,
+      "timesFrom": "learn-build-americas"
     },
     {
       "id": "build-hour",
       "icon": "bolt",
       "title": "Build Hour",
-      "sub": "40 MIN · WEEKDAYS · IRREGULAR",
+      "sub": "60 MIN · WEEKDAYS · IRREGULAR",
       "body": "Build on any theme you like — yours or a suggested one. Ask questions, trade ideas, then demo the outputs to each other.",
       "meetup": true
     },
@@ -107,7 +136,7 @@
       "steps": [
         "Get paired with one member, usually from another region.",
         "Each share one tip — a few lines or a screenshot is fine.",
-        "Try your partner’s tip, then reply."
+        "Try your partner’s tip, then reply. You can talk about other things, like AI (agents) in general, work and culture!!"
       ]
     },
     {
@@ -135,32 +164,53 @@
   "regions": [
     {
       "id": "aeo",
-      "label": "Asia · Europe · Oceania"
+      "label": "Asia · Europe · Oceania",
+      "timeZones": [
+        {
+          "tz": "Australia/Sydney",
+          "label": "auto"
+        },
+        {
+          "tz": "Asia/Tokyo",
+          "label": "JST"
+        },
+        {
+          "tz": "Asia/Kolkata",
+          "label": "IST"
+        },
+        {
+          "tz": "Europe/Berlin",
+          "label": "auto"
+        }
+      ]
     },
     {
       "id": "americas",
       "label": "Americas",
-      "heroLabel": "Americas + Asia·Oceania or Europe",
-      "note": {
-        "title": "What Americas members can do for now",
-        "items": [
-          "Join the **Asia · Europe · Oceania** sessions if the time works:\n- **Learn & Build Sessions** → every other Sunday, 11:00 UTC\n- **Build Hour** → weekdays (time varies)",
-          "These work at any time:\n- **Tips Exchange** → get paired with a member\n- *#03_Ask for help* → ask anything",
-          "Tell us the days and times that suit you, so we can set up the **Americas sessions** as soon as possible."
-        ]
-      },
       "timeZones": [
         {
+          "tz": "Asia/Tokyo",
+          "label": "JST"
+        },
+        {
+          "tz": "Europe/Berlin",
+          "label": "auto"
+        },
+        {
+          "tz": "Asia/Kolkata",
+          "label": "IST"
+        },
+        {
           "tz": "America/New_York",
-          "label": "auto"
+          "label": "ET"
         },
         {
-          "tz": "America/Los_Angeles",
-          "label": "auto"
+          "tz": "America/Chicago",
+          "label": "CT"
         },
         {
-          "tz": "America/Sao_Paulo",
-          "label": "BRT"
+          "tz": "America/Argentina/Buenos_Aires",
+          "label": "ART"
         }
       ]
     }
@@ -184,20 +234,17 @@
       "id": "learn-build",
       "region": "aeo",
       "label": "LEARN & BUILD SESSIONS",
-      "date": "2026-10-11",
-      "startJST": "20:00",
+      "date": "2026-11-30",
+      "startJST": "19:00",
       "durationMin": 45,
       "repeatEveryDays": 14
     },
     {
       "id": "learn-build-americas",
-      "activity": "learn-build",
       "region": "americas",
-      "label": "LEARN & BUILD SESSIONS",
-      "cardSub": "45 MIN · EVERY OTHER WEEK",
-      "tbdText": "Same session, at a different time/date.\nFor members in the Americas, plus Asia & Oceania or Europe (to be decided).\nDay and time will be set after a number of new members from the Americas join us.",
-      "date": null,
-      "startJST": null,
+      "label": "LEARN & BUILD SESSIONS - AMERICAS & GLOBAL",
+      "date": "2026-11-16",
+      "startJST": "23:15",
       "durationMin": 45,
       "repeatEveryDays": 14
     },
@@ -205,32 +252,21 @@
       "id": "build-hour",
       "region": "aeo",
       "label": "BUILD HOUR",
-      "date": "2026-11-04",
+      "date": "2026-11-18",
       "startJST": "19:00",
-      "durationMin": 40,
-      "repeatEveryDays": null
-    },
-    {
-      "id": "build-hour-americas",
-      "activity": "build-hour",
-      "region": "americas",
-      "label": "BUILD HOUR",
-      "cardSub": "40 MIN · ON AN IRREGULAR BASIS・WEEKDAYS",
-      "tbdText": "Same session, at a different time/date.\nFor members in the Americas, plus Asia & Oceania or Europe (to be decided).\nDay and time will be set after a number of new members from the Americas join us.",
-      "date": null,
-      "startJST": null,
-      "durationMin": 40,
+      "durationMin": 60,
       "repeatEveryDays": null
     }
   ],
   "join": {
     "title": "Join Us",
     "subtitle": "Come as you are. It’s casual.",
-    "recruiting": "Now recruiting members from **North & Central & South America** only",
+    "recruiting": "Next Stop: Mars",
     "needTitle": "All you need",
     "requirements": [
       "Some hands-on Claude Code experience",
-      "Conversational English"
+      "Conversational English",
+      "Willing to make a presentation at Learn&Build Session (Not immediately after joining, but after getting used to the activity here!)"
     ],
     "contact": {
       "label": "Want to join? Contact",
@@ -239,5 +275,19 @@
       "photo": "assets/img/contact.jpg",
       "link": ""
     }
-  }
+  },
+  "pastSlides": [
+    {
+      "id": "mcp-qgis",
+      "title": "MCP × QGIS",
+      "pdf": "assets/slides/mcp-qgis.pdf",
+      "thumb": "assets/slides/mcp-qgis.png"
+    },
+    {
+      "id": "critic",
+      "title": "Critic",
+      "pdf": "assets/slides/critic.pdf",
+      "thumb": "assets/slides/critic.png"
+    }
+  ]
 }

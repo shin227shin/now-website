@@ -47,6 +47,7 @@ function tzLabel(date, zone) {
   if (zone.label && zone.label !== 'auto') return zone.label;
   const off = tzOffsetHours(date, zone.tz);
   if (zone.tz.startsWith('Europe/') && (off === 1 || off === 2)) return off === 2 ? 'CEST' : 'CET';
+  if (zone.tz === 'Australia/Sydney') return off === 11 ? 'AEDT' : 'AEST';
   if (zone.tz === 'Europe/London' || zone.tz === 'Europe/Lisbon') return off === 1 ? 'BST' : 'GMT';
   if (zone.tz.startsWith('America/')) { // EDT, PDT, ... (US-style names follow summer time too)
     const n = new Intl.DateTimeFormat('en-US', { timeZone: zone.tz, timeZoneName: 'short' })
@@ -68,46 +69,22 @@ function nextStart(item, now = new Date()) {
   if (step > 0) while (start.getTime() + dur < now.getTime()) start = new Date(start.getTime() + step);
   return start.getTime() + dur < now.getTime() ? null : start;
 }
-// "JST 20:00 – 20:45" rows for every time zone (labels follow summer time on that date)
-function timeRows(c, start, durationMin) {
+// "JST 20:00 – 20:45" rows for the session's time zones, earliest clock time at the top (labels follow summer time on that date)
+function timeRows(c, start, durationMin, item) {
   const end = new Date(start.getTime() + (Number(durationMin) || 0) * 60000);
-  return zonesFor(c).map(z => `<span>${esc(tzLabel(start, z))}</span><span>${hm(start, z.tz)} – ${hm(end, z.tz)}</span>`).join('');
+  return zonesFor(c, item)
+    .map(z => ({ z, from: hm(start, z.tz) }))
+    .sort((a, b) => a.from.localeCompare(b.from))
+    .map(({ z, from }) => `<span>${esc(tzLabel(start, z))}</span><span>${from} – ${hm(end, z.tz)}</span>`).join('');
 }
 
-// ---------- Regions ----------
-// Some sessions run separately for each region (e.g. Asia · Europe · Oceania and the Americas).
-// A schedule item with "region" shows only on that region's tab; one without it shows on every tab.
-// The first tab is picked from the viewer's time zone; ?region=<id> picks one by hand.
-let region = null;
-function pickRegion(c) {
-  const ids = (c.regions || []).map(r => r.id);
-  if (!ids.length) return null;
-  if (ids.includes(region)) return region;
-  const asked = new URLSearchParams(location.search).get('region');
-  if (ids.includes(asked)) return asked;
-  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
-  const inAmericas = /^(America|US|Canada|Brazil|Chile|Mexico)\//.test(tz) || tz === 'Pacific/Honolulu';
-  return inAmericas && ids.includes('americas') ? 'americas' : ids[0];
-}
-const regionNow = c => (c.regions || []).find(r => r.id === region);
-const inRegion = item => !item.region || !region || item.region === region;
-const zonesFor = c => regionNow(c)?.timeZones?.length ? regionNow(c).timeZones : c.timeZones; // a region with no zones of its own uses the main ones
-
-function renderTabs(c, root) {
-  const tabs = root.querySelectorAll('.region-tabs');
-  tabs.forEach(el => {
-    el.style.display = c.regions?.length > 1 ? '' : 'none';
-    el.innerHTML = (c.regions || []).map(r =>
-      `<button type="button" role="tab" data-region="${esc(r.id)}" aria-selected="${r.id === region}">${esc(r.label)}</button>`).join('');
-    el.onclick = e => {
-      const b = e.target.closest('button[data-region]');
-      if (!b || b.dataset.region === region) return;
-      region = b.dataset.region;
-      renderTabs(c, root);
-      renderRegion(c, root);
-    };
-  });
-}
+// ---------- Time zone lists ----------
+// There are no region tabs: every session is shown to everyone.
+// A schedule item's "region" only picks which time zone list its times are shown in (a region with no zones uses the main ones).
+const zonesFor = (c, item) => {
+  const own = (c.regions || []).find(r => r.id === item?.region)?.timeZones;
+  return own?.length ? own : c.timeZones;
+};
 
 // ---------- Sections ----------
 function renderMap(c) {
@@ -176,80 +153,69 @@ function renderCard(a, c) {
   const soon = a.status === 'coming-soon';
   const icon = ICONS[a.icon] ? `<div class="ic"><svg viewBox="0 0 24 24">${ICONS[a.icon]}</svg></div>` : '';
   // Fixed-time activities show their time in each zone, taken from the linked schedule item
-  // (or, on a region tab, from that region's item for the same activity)
-  const item = c.schedule.find(x => inRegion(x) &&
-    ((a.timesFrom && (x.id === a.timesFrom || x.activity === a.timesFrom)) || (x.region && x.activity === a.id)));
+  const item = c.schedule.find(x => (a.timesFrom && (x.id === a.timesFrom || x.activity === a.timesFrom)) || (x.region && x.activity === a.id));
   const sub = soon ? (a.statusLabel || 'COMING SOON') : (item?.cardSub || a.sub);
   const body = a.steps?.length
     ? `<ol>${a.steps.map(s => `<li>${md(s)}</li>`).join('')}</ol>`
     : (a.body ? `<p>${md(a.body)}</p>` : '');
   const start = item && (nextStart(item) || new Date(`${item.date}T${item.startJST}:00+09:00`));
-  const times = start && !isNaN(start) ? `<div class="times">${timeRows(c, start, item.durationMin)}</div>`
+  const times = start && !isNaN(start) ? `<div class="times">${timeRows(c, start, item.durationMin, item)}</div>`
     : item ? `<div class="times tbd"><span>TBD</span>${tbdNote(item)}</div>` : '';
   const meet = a.meetup ? `<div class="meet">${SPARKLE}${esc(a.meetupText || 'After the session: Casual Meetup!!')}</div>` : '';
   return `<div class="card${soon ? ' soon' : ''}">${icon}<h3>${esc(a.title)}</h3>${sub ? `<div class="sub">${esc(sub)}</div>` : ''}${body}${times}${meet}</div>`;
 }
 
-// "8th November" on the calendar of the given zone (Japan by default; a region tab uses its first time zone)
+// "8th November" on the calendar of the given zone (Japan by default; the page passes UTC)
 function dayLabel(start, tz = 'Asia/Tokyo') {
   const p = new Intl.DateTimeFormat('en-GB', { timeZone: tz, day: 'numeric', month: 'long' }).formatToParts(start);
   return `${ordinal(Number(p.find(x => x.type === 'day').value))} ${p.find(x => x.type === 'month').value}`;
 }
 
 function renderSchedule(c, now = new Date()) {
-  return c.schedule.filter(inRegion).map(item => {
+  return c.schedule.map(item => {
     const start = nextStart(item, now);
     if (!start) {
       return `<div class="tbd"><div class="k">${esc(item.label)}</div><div class="d">Date TBD</div><div class="t"><span></span>${tbdNote(item)}</div></div>`;
     }
-    return `<div><div class="k">${esc(item.label)}</div><div class="d">${dayLabel(start, zonesFor(c)[0]?.tz)}</div><div class="t">${timeRows(c, start, item.durationMin)}</div></div>`;
+    return `<div><div class="k">${esc(item.label)}</div><div class="d">${dayLabel(start, 'UTC')}</div><div class="t">${timeRows(c, start, item.durationMin, item)}</div></div>`;
   }).join('');
 }
 
 // Every session for the hero stats row: upcoming ones soonest first, then the ones with no date yet
 function upcoming(c, now = new Date()) {
-  return c.schedule.filter(inRegion)
+  return c.schedule
     .map(item => ({ item, start: nextStart(item, now) }))
     .sort((a, b) => (!a.start - !b.start) || (a.start && b.start ? a.start - b.start : 0));
 }
-const titleCase = s => s.toLowerCase().replace(/(^|\s)\S/g, m => m.toUpperCase());
+const titleCase = s => s.toLowerCase().replace(/(^|[\s&])\S/g, m => m.toUpperCase());
 
-// The parts that change with the region tab: the hero "Next" stats, the activity cards and Next Up
+// The parts built from the schedule: the hero "Next" stats, the activity cards and Next Up
 function renderRegion(c, root = document) {
   const $ = id => root.getElementById ? root.getElementById(id) : root.querySelector('#' + id);
   const stats = $('stats');
   stats.querySelectorAll('.is-next').forEach(el => el.remove());
   const next = upcoming(c);
-  // Say which region the dates are for, since the hero has no tabs of its own
-  const rg = x => { const r = x.item.region && (c.regions || []).find(r => r.id === x.item.region); return r ? `<span class="rg">${esc(r.heroLabel || r.label)}</span>` : ''; };
-  stats.insertAdjacentHTML('beforeend', next.length
-    ? next.map(x => `<div class="stat is-next${x.start ? '' : ' tbd'}"><b>${x.start ? dayLabel(x.start, zonesFor(c)[0]?.tz).replace(/ (\w{3})\w*$/, ' $1') : 'Date TBD'}</b><span>Next: ${esc(titleCase(x.item.label))}</span>${rg(x)}</div>`).join('')
-    : '<div class="stat is-next"><b>TBD</b><span>Next session</span></div>');
+  // The sessions go on a row of their own under Members / Countries (up to four fit side by side)
+  stats.insertAdjacentHTML('beforeend', '<div class="stats-br is-next"></div>' + (next.length
+    ? next.map(x => `<div class="stat is-next${x.start ? '' : ' tbd'}"><b>${x.start ? dayLabel(x.start, 'UTC').replace(/ (\w{3})\w*$/, ' $1') : 'Date TBD'}</b><span>Next: ${esc(titleCase(x.item.label)).replace(' - ', '<br>- ')}</span></div>`).join('')
+    : '<div class="stat is-next"><b>TBD</b><span>Next session</span></div>'));
   $('cards').innerHTML = c.activities.map(a => renderCard(a, c)).join('');
   $('ticket').innerHTML = renderSchedule(c);
-  renderNote(c, root);
 }
 
-// A region's "until then" note under Next Up (e.g. what Americas members can do before their own sessions start)
-function renderNote(c, root = document) {
-  root.querySelectorAll('.region-note').forEach(el => el.remove());
-  const n = regionNow(c)?.note;
-  // The hero button that jumps down to this note is only shown while there is a note
-  const cta = root.querySelector('#hero-cta');
-  if (cta) cta.hidden = !n?.items?.length;
-  const st = root.querySelector('#stats');
-  if (st) st.classList.toggle('has-cta', !!n?.items?.length);
-  if (!n?.items?.length) return;
-  // Lines starting with "- " become a bullet list; other lines are plain text
-  const text = s => String(s).split('\n').reduce((out, line) => {
-    const b = line.match(/^\s*-\s+(.*)/);
-    if (!b) return out + `<p>${md(line)}</p>`;
-    const li = `<li>${md(b[1])}</li>`;
-    return out.endsWith('</ul>') ? out.slice(0, -5) + li + '</ul>' : out + `<ul>${li}</ul>`;
-  }, '');
-  const list = `<ol>${n.items.map((s, i) => `<li><s>${String(i + 1).padStart(2, '0')}</s>${text(s)}</li>`).join('')}</ol>`;
-  root.querySelector('#ticket').insertAdjacentHTML('afterend',
-    `<div class="region-note" id="region-note"><div class="eyebrow">${esc(n.title)}</div>${list}</div>`);
+// Content saved before "pastSlides" existed has none; show the two original slides then
+const PAST_DEFAULT = [
+  { id: 'mcp-qgis', title: 'MCP × QGIS', pdf: 'assets/slides/mcp-qgis.pdf', thumb: 'assets/slides/mcp-qgis.png' },
+  { id: 'critic', title: 'Critic', pdf: 'assets/slides/critic.pdf', thumb: 'assets/slides/critic.png' }
+];
+// Only our own files (relative path or /api/slides/...) are linked, so a bad entry can't point somewhere else
+const slideUrl = u => /^(assets\/|\/api\/slides\/)/.test(u || '') ? u : '';
+function renderPast(c, root) {
+  const $ = id => root.getElementById ? root.getElementById(id) : root.querySelector('#' + id);
+  const list = (c.pastSlides ?? PAST_DEFAULT).filter(s => slideUrl(s.pdf));
+  $('past').style.display = list.length ? '' : 'none';
+  $('past-grid').innerHTML = list.map(s =>
+    `<a class="past-card" href="${esc(slideUrl(s.pdf))}" target="_blank" rel="noopener"><img src="${esc(slideUrl(s.thumb))}" alt="" loading="lazy"><div class="k">LEARN &amp; BUILD SESSION</div><div class="t">${esc(s.title)}</div></a>`).join('');
 }
 
 function renderPage(c, root = document) {
@@ -261,11 +227,10 @@ function renderPage(c, root = document) {
   $('title').textContent = `${h.titleLine1} ${h.titleLine2}`; // hidden heading for screen readers and search engines
   $('members').textContent = t.members;
   $('countries').textContent = t.countries;
-  region = pickRegion(c);
-  renderTabs(c, root);
   renderRegion(c, root);
 
   renderMap(c);
+  renderPast(c, root);
   $('intro-title').textContent = h.introTitle;
   $('tagline').innerHTML = md(h.tagline);
   $('chips').innerHTML = c.countries.map(x =>

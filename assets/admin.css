@@ -122,3 +122,8 @@ dialog form{text-align:right}
   .bar{height:auto;padding:10px 16px;flex-wrap:wrap}
   .split{height:auto}
 }
+
+.slide-row{display:flex;gap:12px;align-items:flex-start}
+.slide-thumb{width:120px;aspect-ratio:16/9;object-fit:cover;border-radius:6px;border:1px solid #ddd;flex:none}
+.slide-f{flex:1;min-width:0}
+.slide-f .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
