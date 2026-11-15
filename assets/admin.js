@@ -91,6 +91,7 @@ async function loadContent() {
   return fetch(DEFAULT_URL, { cache: 'no-store' }).then(r => r.json());
 }
 function setContent(c, markSaved) {
+  c.pastSlides ??= clone(PAST_DEFAULT); // older saved content has none: start from the two original slides
   state = c;
   if (markSaved) savedText = JSON.stringify(content());
   renderEditor();
@@ -360,11 +361,22 @@ function joinSection() {
     ${text('“Get in touch” link (optional)', 'join.contact.link', { ph: 'https://teams.microsoft.com/l/chat/… or mailto:…', hint: 'When set, a “Get in touch” button is shown.' })}`);
 }
 
+function slidesSection() {
+  const items = state.pastSlides.map((s, i) => `<div class="item">${itemHead(s.title, 'pastSlides', i)}
+    <div class="slide-row"><img class="slide-thumb" src="${esc(/^(https?:|\/)/.test(s.thumb) ? s.thumb : '/' + s.thumb)}" alt="">
+      <div class="slide-f">${text('Title', `pastSlides.${i}.title`)}
+        <div class="btns"><a class="btn" href="${esc(/^(https?:|\/)/.test(s.pdf) ? s.pdf : '/' + s.pdf)}" target="_blank" rel="noopener">Open PDF ↗</a>
+        <label class="btn">Replace PDF<input type="file" accept="application/pdf" data-slide="${i}" hidden></label></div></div></div></div>`).join('');
+  return section('slides', 'past', 'Past session slides', `${items}
+    <label class="btn add" id="slide-add">+ Add slide (upload a PDF)<input type="file" accept="application/pdf" data-slide="new" hidden></label>
+    <div class="hint">The first page becomes the thumbnail. PDFs up to 5 MB. More than three slides? The page scrolls sideways.</div>`);
+}
+
 function renderEditor() {
   const ed = $('editor');
   const top = ed.scrollTop;
   const closed = [...ed.querySelectorAll('details:not([open])')].map(d => d.id);
-  ed.innerHTML = headerSection() + countriesSection() + activitiesSection() + scheduleSection() + quotesSection() + joinSection();
+  ed.innerHTML = headerSection() + countriesSection() + activitiesSection() + scheduleSection() + quotesSection() + slidesSection() + joinSection();
   closed.forEach(id => $(id)?.removeAttribute('open'));
   ed.scrollTop = top;
   $('photo-file').addEventListener('change', uploadPhoto);
@@ -494,6 +506,53 @@ $('editor').addEventListener('focusin', e => {
   if (!sec || sec.dataset.scroll === lastSection || !previewReady) return;
   lastSection = sec.dataset.scroll;
   $('pv').contentWindow.postMessage({ type: 'cce-scroll', id: lastSection }, location.origin);
+});
+
+// Slide upload: the first page of the PDF is drawn (pdf.js) into a thumbnail; the PDF and the thumbnail are both stored on the site
+const PDFJS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+function loadPdfJs() {
+  return (loadPdfJs.p ??= new Promise((ok, no) => {
+    const sc = document.createElement('script');
+    sc.src = PDFJS + 'pdf.min.js';
+    sc.onload = () => { pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + 'pdf.worker.min.js'; ok(pdfjsLib); };
+    sc.onerror = () => { loadPdfJs.p = null; no(new Error('Could not load the PDF reader. Check your connection.')); };
+    document.head.appendChild(sc);
+  }));
+}
+async function putSlide(name, blob) {
+  const r = await api('/api/slides/' + name, { method: 'PUT', body: blob, headers: { 'content-type': 'application/octet-stream' } });
+  return r.url;
+}
+async function uploadSlide(file) {
+  if (file.size > 5 * 1024 * 1024) throw new Error('The PDF is too big (max 5 MB).');
+  const lib = await loadPdfJs();
+  const pdf = await lib.getDocument({ data: await file.arrayBuffer() }).promise;
+  const page = await pdf.getPage(1);
+  const base = page.getViewport({ scale: 1 });
+  const vp = page.getViewport({ scale: 960 / base.width });
+  const cv = document.createElement('canvas');
+  cv.width = vp.width; cv.height = vp.height;
+  await page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
+  const thumb = await new Promise(ok => cv.toBlob(ok, 'image/jpeg', 0.85));
+  const id = Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+  return { id, pdf: await putSlide(id + '.pdf', file), thumb: await putSlide(id + '.jpg', thumb) };
+}
+$('editor').addEventListener('change', async e => {
+  const el = e.target, file = el.files?.[0], which = el.dataset?.slide;
+  if (!file || which === undefined) return;
+  if (file.type !== 'application/pdf' && !/\.pdf$/i.test(file.name)) { el.value = ''; return toast('Please choose a PDF file.', true); }
+  toast('Uploading…');
+  try {
+    const up = await uploadSlide(file);
+    if (which === 'new') state.pastSlides.push({ id: up.id, title: file.name.replace(/\.pdf$/i, ''), pdf: up.pdf, thumb: up.thumb });
+    else Object.assign(state.pastSlides[Number(which)], { pdf: up.pdf, thumb: up.thumb });
+    renderEditor();
+    changed();
+    toast('Uploaded. Press “Save & publish” to show it on the site.');
+  } catch (err) {
+    if (err.message !== 'login') toast('Upload failed: ' + err.message, true);
+    el.value = '';
+  }
 });
 
 // Photo upload: crop to a square, shrink to 400 px, store inside the content as a JPEG

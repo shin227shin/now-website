@@ -28,6 +28,7 @@ function problems(c) {
       if (s.startJST && !/^\d{2}:\d{2}$/.test(s.startJST)) out.push(`"${s.label}": start time must look like 20:00.`);
     }
   }
+  if (c.pastSlides !== undefined && !Array.isArray(c.pastSlides)) out.push('pastSlides must be a list.');
   if (Array.isArray(c.join?.requirements) === false) out.push('join.requirements must be a list.');
   return out;
 }
