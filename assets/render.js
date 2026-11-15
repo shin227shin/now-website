@@ -189,6 +189,18 @@ function upcoming(c, now = new Date()) {
 }
 const titleCase = s => s.toLowerCase().replace(/(^|[\s&])\S/g, m => m.toUpperCase());
 
+// Hover / tap bubble on a hero session: the time in one city per region (Asia, Europe, Oceania, Americas)
+const HERO_ZONES = [
+  { tz: 'Asia/Tokyo', name: 'Asia', label: 'JST', utc: 'UTC+9' }, { tz: 'Europe/Berlin', name: 'Europe' },
+  { tz: 'Australia/Sydney', name: 'Oceania' }, { tz: 'America/New_York', name: 'Americas' }
+];
+function heroTip(start, durationMin) {
+  const end = new Date(start.getTime() + (Number(durationMin) || 0) * 60000);
+  const day = tz => new Intl.DateTimeFormat('en-GB', { timeZone: tz, weekday: 'short', day: 'numeric', month: 'short' }).format(start);
+  const rows = HERO_ZONES.map(z => `<span class="r">${z.name}</span><span class="z">${esc(tzLabel(start, z))}${z.utc ? `=${z.utc}` : ''}</span><span class="d">${day(z.tz)}</span><span class="t">${hm(start, z.tz)} – ${hm(end, z.tz)}</span>`).join('');
+  return `<div class="stat-tip" role="tooltip">${rows}</div>`;
+}
+
 // The parts built from the schedule: the hero "Next" stats, the activity cards and Next Up
 function renderRegion(c, root = document) {
   const $ = id => root.getElementById ? root.getElementById(id) : root.querySelector('#' + id);
@@ -197,7 +209,7 @@ function renderRegion(c, root = document) {
   const next = upcoming(c);
   // The sessions go on a row of their own under Members / Countries (up to four fit side by side)
   stats.insertAdjacentHTML('beforeend', '<div class="stats-br is-next"></div>' + (next.length
-    ? next.map(x => `<div class="stat is-next${x.start ? '' : ' tbd'}"><b>${x.start ? dayLabel(x.start, 'UTC').replace(/ (\w{3})\w*$/, ' $1') : 'Date TBD'}</b><span>Next: ${esc(titleCase(x.item.label)).replace(' - ', '<br>- ')}</span></div>`).join('')
+    ? next.map(x => `<div class="stat is-next${x.start ? ' has-tip' : ' tbd'}"${x.start ? ' tabindex="0"' : ''}>${x.start ? heroTip(x.start, x.item.durationMin) : ''}<b>${x.start ? dayLabel(x.start, 'UTC').replace(/ (\w{3})\w*$/, ' $1') : 'Date TBD'}</b><span>Next: ${esc(titleCase(x.item.label)).replace(' - ', '<br>- ')}</span></div>`).join('')
     : '<div class="stat is-next"><b>TBD</b><span>Next session</span></div>'));
   $('cards').innerHTML = c.activities.map(a => renderCard(a, c)).join('');
   $('ticket').innerHTML = renderSchedule(c);
