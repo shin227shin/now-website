@@ -99,6 +99,16 @@ body{counter-reset:sec}
 .stat.is-next span{white-space:nowrap}
 .stat.is-next b{color:var(--coral)}
 .stat.tbd{opacity:.6}
+/* Bubble with the session time in four regions (hover, or tap / keyboard focus on touch screens) */
+.stat.has-tip{position:relative;cursor:default;outline:0}
+.stat-tip{position:absolute;left:50%;bottom:calc(100% + 14px);z-index:20;display:grid;grid-template-columns:auto auto auto auto;gap:7px 12px;align-items:baseline;width:max-content;padding:16px 18px;border-radius:16px;background:rgba(255,255,255,.97);color:var(--ink);text-align:left;box-shadow:0 20px 48px rgba(0,0,0,.35);opacity:0;visibility:hidden;transform:translate(-50%,6px);transition:opacity .25s,transform .25s,visibility .25s;pointer-events:none}
+.stat-tip::after{content:"";position:absolute;left:50%;top:100%;width:12px;height:12px;background:inherit;transform:translate(-50%,-6px) rotate(45deg);border-radius:2px}
+.stat.has-tip:hover .stat-tip,.stat.has-tip:focus .stat-tip{opacity:1;visibility:visible;transform:translate(-50%,0)}
+.stat .stat-tip span{display:block;margin:0;white-space:nowrap;font-size:13px;font-weight:500;color:var(--ink)}
+.stat .stat-tip .r{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--coral-d)}
+.stat .stat-tip .z{color:#7a7f8c;font-size:12px}
+.stat .stat-tip .d{color:#7a7f8c}
+.stat .stat-tip .t{font-weight:600;font-variant-numeric:tabular-nums}
 .stat span.rg{margin-top:4px;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#8d99c4}
 
 /* ---------- Opening intro: somewhere in space → close in on Earth → flash → world map with pins lighting up ---------- */
@@ -234,6 +244,7 @@ footer{padding:36px 32px 44px;border-top:1px solid #e3e4e8;text-align:center;fon
   .hero{padding-top:72px}
   .map{padding:0 8px}
   .stats{margin-top:12px;display:grid;grid-template-columns:1fr 1fr;row-gap:24px;padding:0 12px 56px}
+  .stat-tip{left:0;transform:translate(0,6px)}.stat.has-tip:hover .stat-tip,.stat.has-tip:focus .stat-tip{transform:none}.stat-tip::after{left:36px}.stat:nth-child(even) .stat-tip{left:auto;right:0}.stat:nth-child(even) .stat-tip::after{left:auto;right:36px}
   .stats-br{display:none}.stat.is-next{padding:0 12px}.stat.is-next span{white-space:normal}
   .stat{padding:0 12px}.stat b{font-size:28px}.stat span{font-size:12px}
   .stat+.stat{border-left:0}.stat:nth-child(even){border-left:1px solid rgba(255,255,255,.18)}
