@@ -211,6 +211,18 @@ function renderRegion(c, root = document) {
   stats.insertAdjacentHTML('beforeend', '<div class="stats-br is-next"></div>' + (next.length
     ? next.map(x => `<div class="stat is-next${x.start ? ' has-tip' : ' tbd'}"${x.start ? ' tabindex="0"' : ''}>${x.start ? heroTip(x.start, x.item.durationMin) : ''}<b>${x.start ? dayLabel(x.start, 'UTC').replace(/ (\w{3})\w*$/, ' $1') : 'Date TBD'}</b><span>Next: ${esc(titleCase(x.item.label)).replace(' - ', '<br>- ')}</span></div>`).join('')
     : '<div class="stat is-next"><b>TBD</b><span>Next session</span></div>'));
+  // Keep the bubble inside the screen: nudge it sideways by however much it overflows (tablet widths)
+  stats.querySelectorAll('.has-tip').forEach(el => {
+    const fit = () => {
+      const tip = el.querySelector('.stat-tip'); tip.style.setProperty('--tx', '0px');
+      const r = tip.getBoundingClientRect(), vw = document.documentElement.clientWidth;
+      const tx = Math.round(Math.max(8 - r.left, Math.min(0, vw - 8 - r.right)));
+      const sr = el.getBoundingClientRect();
+      tip.style.setProperty('--tx', tx + 'px');
+      tip.style.setProperty('--ax', Math.round(sr.left + sr.width / 2 - (r.left + tx)) + 'px'); // arrow stays under the session
+    };
+    ['mouseenter', 'focus', 'touchstart'].forEach(ev => el.addEventListener(ev, fit, { passive: true }));
+  });
   $('cards').innerHTML = c.activities.map(a => renderCard(a, c)).join('');
   $('ticket').innerHTML = renderSchedule(c);
 }
