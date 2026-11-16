@@ -31,10 +31,11 @@ body{counter-reset:sec}
 .hl{color:var(--coral-d);font-weight:600}
 
 /* ---------- Nav ---------- */
-.nav{position:fixed;inset:0 0 auto;z-index:10;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;color:#fff;transition:background .3s,color .3s,box-shadow .3s}
+.nav{position:fixed;inset:0 0 auto;z-index:10;height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;color:#fff;transition:background .3s,color .3s,box-shadow .3s}
 .nav.solid{background:rgba(255,255,255,.92);backdrop-filter:blur(12px);color:var(--ink);box-shadow:0 1px 0 rgba(0,0,0,.06)}
-.nav .logo{position:relative;display:block;height:40px}
-.nav .logo img{display:block;height:40px;width:auto;transition:opacity .3s}
+/* Full logo (3 lines). Tall enough that "ON EARTH" can still be read; flex-shrink:0 so it never gets squeezed. */
+.nav .logo{position:relative;display:block;flex-shrink:0;height:56px}
+.nav .logo img{display:block;height:56px;width:auto;max-width:none;transition:opacity .3s}
 .nav .logo .on-light{position:absolute;left:0;top:0;opacity:0}
 .nav.solid .logo .on-dark{opacity:0}
 .nav.solid .logo .on-light{opacity:1}
@@ -250,7 +251,8 @@ footer{padding:36px 32px 44px;border-top:1px solid #e3e4e8;text-align:center;fon
 }
 @media (max-width:640px){
   .wrap{padding:0 20px}
-  .nav{padding:0 20px}.nav .yr{min-width:0}
+  .nav{padding:0 20px;height:64px}.nav .yr{min-width:0}
+  .nav .logo,.nav .logo img{height:48px}
   .hero{padding-top:72px}
   .map{padding:0 8px}
   .stats{margin-top:12px;display:grid;grid-template-columns:1fr 1fr;row-gap:24px;padding:0 12px 56px}
