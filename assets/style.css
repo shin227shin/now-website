@@ -33,9 +33,11 @@ body{counter-reset:sec}
 /* ---------- Nav ---------- */
 .nav{position:fixed;inset:0 0 auto;z-index:10;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;color:#fff;transition:background .3s,color .3s,box-shadow .3s}
 .nav.solid{background:rgba(255,255,255,.92);backdrop-filter:blur(12px);color:var(--ink);box-shadow:0 1px 0 rgba(0,0,0,.06)}
-.nav .logo{font-size:13px;font-weight:700;letter-spacing:.32em}
-.nav .logo em{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:600;letter-spacing:.06em;font-size:17px;color:var(--coral)}
-.nav.solid .logo em{color:var(--coral-d)}
+.nav .logo{position:relative;display:block;height:40px}
+.nav .logo img{display:block;height:40px;width:auto;transition:opacity .3s}
+.nav .logo .on-light{position:absolute;left:0;top:0;opacity:0}
+.nav.solid .logo .on-dark{opacity:0}
+.nav.solid .logo .on-light{opacity:1}
 .nav ul{display:flex;gap:6px;list-style:none}
 .nav ul a{display:block;font-size:14px;font-weight:500;padding:6px 14px;border-radius:6px;transition:background .2s}
 .nav ul a:hover{background:rgba(255,255,255,.14)}
@@ -141,6 +143,12 @@ html.intro.landed .pin-g{animation:pin-on .7s cubic-bezier(.2,.9,.3,1.4) both;an
 .quote q{quotes:none;display:block;max-width:880px;font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:46px;line-height:1.2;color:var(--ink)}
 .quote small{display:block;margin-top:28px;font-size:13px;letter-spacing:.2em;font-weight:600;color:var(--gold)}
 
+/* Founding story: sits under the pull quote, same left edge and same signature style; plain sans text, two weights (Tesla-style) */
+.story{margin:88px 0 0 150px;max-width:780px}
+.story h3{font-size:32px;font-weight:500;line-height:1.25;color:var(--ink)}
+.story p{margin-top:20px;font-size:19px;font-weight:400;line-height:1.7;color:var(--text)}
+.story small{display:block;margin-top:28px;font-size:13px;letter-spacing:.2em;font-weight:600;color:var(--gold)}
+
 /* ---------- Region tabs (above the cards and Next Up) ---------- */
 .region-tabs{display:inline-flex;gap:4px;margin-top:40px;padding:4px;border-radius:99px;background:#fff;border:1px solid #e3e4e8}
 .region-tabs button{font:inherit;font-size:14px;font-weight:600;letter-spacing:.02em;padding:10px 22px;border:0;border-radius:99px;background:transparent;color:var(--muted);cursor:pointer;transition:background .25s,color .25s}
@@ -225,6 +233,7 @@ html.intro.landed .pin-g{animation:pin-on .7s cubic-bezier(.2,.9,.3,1.4) both;an
 .rec .live:after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--coral-d);animation:ping 1.8s ease-out infinite}
 @keyframes ping{0%{transform:scale(1);opacity:.6}100%{transform:scale(2.8);opacity:0}}
 footer{padding:36px 32px 44px;border-top:1px solid #e3e4e8;text-align:center;font-size:13px;letter-spacing:.04em;color:var(--muted)}
+.foot-logo{display:block;height:84px;width:auto;margin:0 auto 20px}
 
 /* ---------- Smaller screens ---------- */
 @media (max-width:900px){
@@ -233,6 +242,7 @@ footer{padding:36px 32px 44px;border-top:1px solid #e3e4e8;text-align:center;fon
   section{padding:96px 0}
   h2{font-size:32px}
   .quote q{font-size:34px}.quote{padding-left:110px}.quote:before{font-size:180px;top:-28px}
+  .story{margin-left:110px}
   .sec-head{grid-template-columns:1fr;gap:20px}.sec-head h2,.join-intro h2{font-size:42px}
   .chips{grid-template-columns:repeat(3,1fr)}
   .grid{grid-template-columns:1fr 1fr}.grid>.card,.grid>.card:nth-child(-n+2){grid-column:auto}.grid>.card.soon{grid-column:1/-1}
@@ -256,6 +266,7 @@ footer{padding:36px 32px 44px;border-top:1px solid #e3e4e8;text-align:center;fon
   .idx:before{padding-right:44px;background-size:30px 1px}
   .chips{grid-template-columns:1fr 1fr;column-gap:24px}.chip{font-size:15px;padding:16px 0}
   .quote{margin-top:72px;padding-left:0;padding-top:64px}.quote:before{font-size:150px;top:-16px}.quote q{font-size:28px}
+  .story{margin:56px 0 0}.story h3{font-size:26px}.story p{font-size:17px}.story small{font-size:11px;letter-spacing:.1em}
   .grid{grid-template-columns:1fr;margin-top:40px}
   .region-tabs{display:flex;margin-top:28px}.region-tabs button{flex:1;padding:10px 12px;font-size:13px}
   .card.soon{flex-direction:column;align-items:flex-start;gap:16px}.card.soon .sub{margin:0;white-space:normal}.card.soon:after{display:none}
