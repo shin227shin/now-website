@@ -38,7 +38,7 @@ if (!new URLSearchParams(location.search).has('preview') && !location.hash && !m
 <script src="assets/earth.js"></script>
 <script src="assets/intro.js"></script>
 <nav class="nav" id="nav">
-  <a class="logo" href="#top">CLAUDE CODE <em>on Earth</em></a>
+  <a class="logo" href="#top" aria-label="Claude Code on Earth"><img class="on-dark" src="assets/img/logo-short-white.png" alt=""><img class="on-light" src="assets/img/logo-short.png" alt=""></a>
   <ul><li><a href="#community">Community</a></li><li><a href="#activities">Activities</a></li><li><a href="#next">Next Up</a></li><li><a href="#past">Examples</a></li><li><a href="#join">Join</a></li></ul>
   <span class="yr" id="year"></span>
 </nav>
@@ -64,6 +64,11 @@ if (!new URLSearchParams(location.search).has('preview') && !location.hash && !m
   </div>
   <div class="chips reveal" id="chips"></div>
   <div class="quote reveal" id="quote"></div>
+  <div class="story reveal">
+    <h3>How "Claude Code on Earth" began</h3>
+    <p>I got crazy about Claude Code, and I wanted to connect with people who have the same interest. Also, I've always loved interacting with people around the world.<br>Those two things came together, and that is how this community started!</p>
+    <small>— SHINTARO (FOUNDER &amp; LEAD), JAPAN</small>
+  </div>
 </div></section>
 
 <section class="acts" id="activities"><div class="wrap">
@@ -94,7 +99,7 @@ if (!new URLSearchParams(location.search).has('preview') && !location.hash && !m
   </div>
 </div></section>
 
-<footer id="foot"></footer>
+<footer><img class="foot-logo" src="assets/img/logo-primary.png" alt="Claude Code on Earth"><p id="foot"></p></footer>
 
 <script src="assets/countries.js"></script>
 <script src="assets/globe.js"></script>
