@@ -287,7 +287,10 @@
       "id": "critic",
       "title": "Critic",
       "pdf": "assets/slides/critic.pdf",
-      "thumb": "assets/slides/critic.png"
+      "thumb": "assets/slides/critic.png",
+      "name": "shintaro",
+      "country": "Japan",
+      "linkedin": "https://www.linkedin.com/in/shintaro-yasuda-6738602a9/"
     }
   ]
 }

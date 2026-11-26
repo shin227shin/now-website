@@ -233,7 +233,7 @@ function renderRegion(c, root = document) {
 // Content saved before "pastSlides" existed has none; show the two original slides then
 const PAST_DEFAULT = [
   { id: 'mcp-qgis', title: 'MCP × QGIS', pdf: 'assets/slides/mcp-qgis.pdf', thumb: 'assets/slides/mcp-qgis.png' },
-  { id: 'critic', title: 'Critic', pdf: 'assets/slides/critic.pdf', thumb: 'assets/slides/critic.png' }
+  { id: 'critic', title: 'Critic', pdf: 'assets/slides/critic.pdf', thumb: 'assets/slides/critic.png', name: 'shintaro', country: 'Japan', linkedin: 'https://www.linkedin.com/in/shintaro-yasuda-6738602a9/' }
 ];
 // Only our own files (relative path or /api/slides/...) are linked, so a bad entry can't point somewhere else
 const slideUrl = u => /^(assets\/|\/api\/slides\/)/.test(u || '') ? u : '';
@@ -241,8 +241,18 @@ function renderPast(c, root) {
   const $ = id => root.getElementById ? root.getElementById(id) : root.querySelector('#' + id);
   const list = (c.pastSlides ?? PAST_DEFAULT).filter(s => slideUrl(s.pdf));
   $('past').style.display = list.length ? '' : 'none';
+  // Presenter line under the slide: name · country, plus a LinkedIn link (https only). Hidden when all three are empty
+  const who = s => {
+    const li = /^https:\/\//i.test(s.linkedin || '') ? s.linkedin : '';
+    if (!s.name && !s.country && !li) return '';
+    const pin = '<svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+    const av = s.name ? `<span class="who-av">${esc([...s.name.trim()][0]?.toUpperCase() || '')}</span>` : '';
+    const txt = (s.name || s.country) ? `<span class="who-txt">${s.name ? `<span class="who-name">${esc(s.name)}</span>` : ''}${s.country ? `<span class="who-country">${pin}${esc(s.country)}</span>` : ''}</span>` : '';
+    const link = li ? `<a class="who-li" href="${esc(li)}" target="_blank" rel="noopener">Linkedin<svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></a>` : '';
+    return `<div class="who"><span class="who-id">${av}${txt}</span>${link}</div>`;
+  };
   $('past-grid').innerHTML = list.map(s =>
-    `<a class="past-card" href="${esc(slideUrl(s.pdf))}" target="_blank" rel="noopener"><img src="${esc(slideUrl(s.thumb))}" alt="" loading="lazy"><div class="k">LEARN &amp; BUILD SESSION</div><div class="t">${esc(s.title)}</div></a>`).join('');
+    `<div class="past-card"><a class="past-open" href="${esc(slideUrl(s.pdf))}" target="_blank" rel="noopener"><img src="${esc(slideUrl(s.thumb))}" alt="" loading="lazy"><div class="k">LEARN &amp; BUILD SESSION</div><div class="t">${esc(s.title)}</div></a>${who(s)}</div>`).join('');
 }
 
 function renderPage(c, root = document) {

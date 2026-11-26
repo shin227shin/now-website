@@ -365,6 +365,8 @@ function slidesSection() {
   const items = state.pastSlides.map((s, i) => `<div class="item">${itemHead(s.title, 'pastSlides', i)}
     <div class="slide-row"><img class="slide-thumb" src="${esc(/^(https?:|\/)/.test(s.thumb) ? s.thumb : '/' + s.thumb)}" alt="">
       <div class="slide-f">${text('Title', `pastSlides.${i}.title`)}
+        <div class="row">${text('Presenter name', `pastSlides.${i}.name`)}${text('Country', `pastSlides.${i}.country`, { list: 'country-names' })}</div>
+        ${text('LinkedIn URL', `pastSlides.${i}.linkedin`, { ph: 'https://www.linkedin.com/in/…', hint: 'Shown under the slide. Must start with https://' })}
         <div class="btns"><a class="btn" href="${esc(/^(https?:|\/)/.test(s.pdf) ? s.pdf : '/' + s.pdf)}" target="_blank" rel="noopener">Open PDF ↗</a>
         <label class="btn">Replace PDF<input type="file" accept="application/pdf" data-slide="${i}" hidden></label></div></div></div></div>`).join('');
   return section('slides', 'past', 'Past session slides', `${items}
