@@ -320,6 +320,17 @@ html{scroll-behavior:smooth}
 .past-grid{display:flex;gap:24px;margin-top:48px;overflow-x:auto;scroll-snap-type:x proximity;padding:8px 4px 24px;-webkit-overflow-scrolling:touch}
 .past-card{display:block;flex:0 0 calc((100% - 48px) / 3);min-width:280px;scroll-snap-align:start;background:#fff;border:1px solid #e8e8e6;border-radius:20px;padding:16px;transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s,border-color .35s}
 .past-card:hover{transform:translateY(-4px);border-color:transparent;box-shadow:0 24px 48px rgba(14,18,38,.10)}
+.past-open{display:block;color:inherit}
+.past-card .who{display:flex;align-items:center;justify-content:space-between;gap:10px 12px;margin:6px 8px 4px;padding-top:14px;border-top:1px solid #eee}
+.past-card .who-id{display:flex;align-items:center;gap:10px;min-width:0}
+.past-card .who-av{flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:15px;color:#fff;background:linear-gradient(135deg,#2b3350,#5b6a9a)}
+.past-card .who-txt{display:flex;flex-direction:column;line-height:1.25;min-width:0}
+.past-card .who-name{font-size:15px;font-weight:600;color:var(--ink)}
+.past-card .who-country{display:inline-flex;align-items:center;gap:4px;font-size:13px;color:#777}
+.past-card .who-country svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.past-card .who-li{flex:none;display:inline-flex;align-items:center;gap:4px;padding:7px 14px;border-radius:999px;font-size:13px;font-weight:600;color:#0A66C2;background:#eaf3fb;transition:background .25s,color .25s}
+.past-card .who-li svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.past-card .who-li:hover{background:#0A66C2;color:#fff}
 .past-card img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:12px;border:1px solid #eee}
 .past-card .k{margin:16px 8px 0;font-size:12px;letter-spacing:.18em;font-weight:600;color:var(--coral-d)}
 .past-card .t{margin:6px 8px 8px;font-size:20px;font-weight:600;color:var(--ink);letter-spacing:-.01em}
